@@ -51,7 +51,7 @@ Make appropriate healthcare information, guidance, professional support, and ref
 
 ## Product Requirements
 
-The full specification is in [Rural Help.md](./Rural%20Help.md), a Product Requirements Document covering users, features, workflows, safety requirements, success measures, and MVP scope.
+The full specification is in [PRD.md](./PRD.md), a Product Requirements Document covering users, features, workflows, safety requirements, success measures, and MVP scope.
 
 ## Status
 

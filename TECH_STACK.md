@@ -14,7 +14,7 @@ Current deployment mode: **the app and database run locally** for now — no clo
 ## Database
 
 - **PostgreSQL** (v18) from day one — same database in dev and production, so no migration drift.
-- Access via **Prisma ORM** (schema migrations managed by Prisma).
+- Access via **Drizzle ORM** (TypeScript schema; migrations are plain SQL via `drizzle-kit`). Decision rationale in PRD §78.1.
 - Running locally as a Windows service (`postgresql-x64-18`).
 - Offline capability is delivered by the client (PWA IndexedDB cache), not the server database.
 - Future: local vector index for symptom-matching support.
