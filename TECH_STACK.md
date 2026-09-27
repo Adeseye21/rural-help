@@ -1,6 +1,6 @@
 # Rural Help — Tech Stack
 
-Current deployment mode: **the app and database run locally** for now — no cloud services, no hosted database, no remote storage. Everything is self-contained on the machine.
+Current deployment mode: **the app and database run locally** for now — no cloud services, no hosted database, no remote storage. The database is the local PostgreSQL instance on this machine.
 
 ## Framework
 
@@ -13,8 +13,10 @@ Current deployment mode: **the app and database run locally** for now — no clo
 
 ## Database
 
-- **Local:** SQLite (file-based) via **Prisma ORM**.
-- **On deployment:** migrate to **PostgreSQL** (Prisma migration path maintained from day one).
+- **PostgreSQL** (v18) from day one — same database in dev and production, so no migration drift.
+- Access via **Prisma ORM** (schema migrations managed by Prisma).
+- Running locally as a Windows service (`postgresql-x64-18`).
+- Offline capability is delivered by the client (PWA IndexedDB cache), not the server database.
 - Future: local vector index for symptom-matching support.
 
 ## Authentication
