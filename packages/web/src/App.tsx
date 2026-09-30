@@ -580,29 +580,28 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 36,
     fontWeight: 700,
     letterSpacing: -0.8,
-    color: "#ffd166",
-    margin: 0,
-    textShadow: "0 2px 14px rgba(0,0,0,.35)"
+    color: "#1F5C43",
+    margin: 0
   },
-  subtitle: { color: "#c3cbe8", fontSize: 15, marginTop: 4, textAlign: "center" },
+  subtitle: { color: "#66736C", fontSize: 15, marginTop: 4, textAlign: "center" },
   card: {
     width: "100%",
     maxWidth: 420,
-    background: "linear-gradient(180deg, #ffffff 0%, #f2f3fb 100%)",
-    border: "1px solid #d3d7ee",
-    borderRadius: 18,
-    boxShadow: "0 10px 30px rgba(11,16,48,.35)",
+    background: "#FFFFFF",
+    border: "1px solid #E3EAE5",
+    borderRadius: 16,
+    boxShadow: "0 1px 2px rgba(38,51,45,.04), 0 8px 20px rgba(38,51,45,.06)",
     padding: 26,
     marginTop: 24,
     display: "flex",
     flexDirection: "column",
     gap: 12
   },
-  cardTitle: { fontSize: 20, fontWeight: 700, margin: 0, color: "#2a2f6b" },
-  line: { fontSize: 15, margin: 0, color: "#2f3350" },
+  cardTitle: { fontSize: 20, fontWeight: 700, margin: 0, color: "#1F5C43" },
+  line: { fontSize: 15, margin: 0, color: "#26332D" },
   formBlock: { display: "flex", flexDirection: "column", gap: 10 },
-  label: { fontSize: 14, fontWeight: 600, color: "#2a2f6b" },
-  consentRow: { display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#2f3350" },
+  label: { fontSize: 14, fontWeight: 600, color: "#1F5C43" },
+  consentRow: { display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#26332D" },
   passwordWrap: { position: "relative" },
   passwordToggle: {
     position: "absolute",
@@ -611,7 +610,7 @@ const styles: Record<string, CSSProperties> = {
     transform: "translateY(-50%)",
     background: "transparent",
     border: "none",
-    color: "#3f47b5",
+    color: "#2E7D5B",
     fontSize: 13,
     fontWeight: 600,
     cursor: "pointer",
@@ -621,15 +620,15 @@ const styles: Record<string, CSSProperties> = {
     fontFamily: "inherit",
     fontSize: 16,
     padding: "12px 14px",
-    color: "#1c2040",
-    background: "#ffffff",
-    border: "2px solid #d3d7ee",
+    color: "#26332D",
+    background: "#FFFFFF",
+    border: "2px solid #DCE5DF",
     borderRadius: 12,
     outline: "none"
   },
   primary: {
-    background: "linear-gradient(180deg, #5b63d8 0%, #3f47b5 100%)",
-    color: "#ffffff",
+    background: "#2E7D5B",
+    color: "#FFFFFF",
     border: "none",
     borderRadius: 12,
     padding: "13px 22px",
@@ -637,12 +636,12 @@ const styles: Record<string, CSSProperties> = {
     fontWeight: 600,
     fontFamily: "inherit",
     cursor: "pointer",
-    boxShadow: "0 6px 16px rgba(63,71,181,.35)"
+    boxShadow: "0 4px 12px rgba(46,125,91,.28)"
   },
   secondary: {
-    background: "#e8eaff",
-    color: "#2a2f6b",
-    border: "1px solid #c5cafb",
+    background: "#FFFFFF",
+    color: "#2E7D5B",
+    border: "2px solid #2E7D5B",
     borderRadius: 12,
     padding: "12px 22px",
     fontSize: 15,
@@ -653,7 +652,7 @@ const styles: Record<string, CSSProperties> = {
   },
   ghost: {
     background: "transparent",
-    color: "#3f47b5",
+    color: "#1F5C43",
     border: "none",
     fontSize: 14,
     fontWeight: 600,
@@ -662,14 +661,14 @@ const styles: Record<string, CSSProperties> = {
     padding: 4,
     textAlign: "left"
   },
-  error: { fontSize: 14, color: "#b3261e", margin: 0, fontWeight: 500 },
-  status: { fontSize: 13, color: "#3f47b5", margin: 0 },
+  error: { fontSize: 14, color: "#D9534F", margin: 0, fontWeight: 500 },
+  status: { fontSize: 13, color: "#1F5C43", margin: 0 },
   codeBox: {
     display: "flex",
     flexDirection: "column",
     gap: 4,
-    background: "#eceeff",
-    border: "1px dashed #9aa2f0",
+    background: "#F1F8F2",
+    border: "1px dashed #81C784",
     borderRadius: 12,
     padding: 12
   },
@@ -677,17 +676,17 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 28,
     fontWeight: 700,
     letterSpacing: 6,
-    color: "#2a2f6b",
+    color: "#1F5C43",
     margin: 0
   },
   banner: {
-    background: "linear-gradient(180deg, #fee2e2 0%, #fecaca 100%)",
-    border: "1px solid #fca5a5",
+    background: "linear-gradient(180deg, #FDECEA 0%, #FBDAD7 100%)",
+    border: "1px solid #D9534F",
     borderRadius: 12,
     padding: 14,
-    color: "#7f1d1d",
+    color: "#8C2F2C",
     marginTop: 8,
-    boxShadow: "0 4px 12px rgba(127,29,29,.15)"
+    boxShadow: "0 4px 12px rgba(217,83,79,.2)"
   },
   bannerText: { fontSize: 14, margin: "6px 0 0 0" }
 };
