@@ -22,6 +22,13 @@
       "when": 1790775999922,
       "tag": "0002_light_shriek",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790778662762,
+      "tag": "0003_redundant_matthew_murdock",
+      "breakpoints": true
     }
   ]
 }

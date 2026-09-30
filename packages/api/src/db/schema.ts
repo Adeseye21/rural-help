@@ -4,6 +4,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  real,
   text,
   timestamp,
   uuid,
@@ -61,6 +62,38 @@ export const passwordResets = pgTable(
   },
   (t) => [index("password_resets_user_idx").on(t.userId)]
 );
+
+export const reviewStatusEnum = pgEnum("review_status", ["pending", "approved", "declined", "shared"]);
+
+export const reviewRequests = pgTable(
+  "review_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    symptomText: text("symptom_text").notNull(),
+    summary: text("summary").notNull(),
+    possibleCauses: jsonb("possible_causes").notNull(),
+    urgency: text("urgency").notNull().default("routine"),
+    status: reviewStatusEnum("status").notNull().default("pending"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => [index("review_requests_patient_idx").on(t.patientId)]
+);
+
+export const facilities = pgTable("facilities", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  capability: text("capability").notNull(),
+  address: text("address").notNull(),
+  phone: text("phone"),
+  openHours: text("open_hours"),
+  latitude: real("latitude").notNull(),
+  longitude: real("longitude").notNull()
+});
 
 export const patientProfiles = pgTable(
   "patient_profiles",

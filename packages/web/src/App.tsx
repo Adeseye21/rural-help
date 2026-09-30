@@ -341,6 +341,7 @@ function SignedIn({ session, onSignOut }: { session: AuthResult; onSignOut: () =
   const [contact, setContact] = useState("");
   const [shareLocation, setShareLocation] = useState(false);
   const [msg, setMsg] = useState("");
+  const [reviewKey, setReviewKey] = useState(0);
 
   useEffect(() => {
     fetch("/api/patient/profile", { headers: { Authorization: `Bearer ${session.accessToken}` } })
@@ -411,8 +412,13 @@ function SignedIn({ session, onSignOut }: { session: AuthResult; onSignOut: () =
           Sign out
         </button>
       </div>
-      <SymptomGuidance token={session.accessToken} />
+      <SymptomGuidance
+        token={session.accessToken}
+        onReviewCreated={() => setReviewKey((k) => k + 1)}
+      />
       <FirstAidGuides token={session.accessToken} />
+      <ReviewRequestCard token={session.accessToken} refreshKey={reviewKey} />
+      <FacilitiesCard token={session.accessToken} />
     </main>
   );
 }
@@ -468,13 +474,48 @@ function FirstAidBlock({ topic }: { topic: FirstAid }) {
   );
 }
 
-function SymptomGuidance({ token }: { token: string }) {
+function SymptomGuidance({
+  token,
+  onReviewCreated
+}: {
+  token: string;
+  onReviewCreated: () => void;
+}) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<AssessResult | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [refined, setRefined] = useState<RefineResult | null>(null);
   const [err, setErr] = useState("");
+  const [reviewMsg, setReviewMsg] = useState("");
+
+  async function requestReview() {
+    if (!result) return;
+    setBusy(true);
+    setErr("");
+    try {
+      const res = await fetch("/api/review/requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          symptomText: text,
+          possibleCauses: result.possibleCauses,
+          urgency: refined?.urgency ?? "routine",
+          emergency: result.isEmergency
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) setErr(data.error ?? "Could not create the review request");
+      else {
+        setReviewMsg("Review request created. Check the review section below to approve sharing.");
+        onReviewCreated();
+      }
+    } catch {
+      setErr("Network problem. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function assess() {
     if (text.trim().length < 3) return;
@@ -589,12 +630,157 @@ function SymptomGuidance({ token }: { token: string }) {
               <p style={styles.line}>{refined.nextStep}</p>
             </div>
           )}
+          <button style={styles.secondary} type="button" onClick={requestReview} disabled={busy}>
+            Ask a healthcare worker to review this
+          </button>
+          {reviewMsg && <p style={styles.status}>{reviewMsg}</p>}
         </>
       )}
       {result?.disclaimer && <p style={styles.status}>{result.disclaimer}</p>}
     </div>
   );
 }
+
+function ReviewRequestCard({ token, refreshKey }: { token: string; refreshKey: number }) {
+  const [items, setItems] = useState<ReviewRequest[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  const load = () => {
+    fetch("/api/review/requests", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => setItems(Array.isArray(d) ? d : []))
+      .catch(() => setErr("Could not load your review requests."));
+  };
+
+  useEffect(load, [token, refreshKey]);
+
+  async function decide(id: string, action: "approve" | "decline") {
+    setBusy(true);
+    setErr("");
+    try {
+      const res = await fetch(`/api/review/requests/${id}/${action}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) setErr(data.error ?? "Could not update the request");
+      load();
+    } catch {
+      setErr("Network problem. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div style={styles.card}>
+      <h2 style={styles.cardTitle}>Ask a healthcare worker to review</h2>
+      <p style={styles.subtitle}>
+        A summary is prepared from your symptom guidance. Nothing is shared until you approve it.
+      </p>
+      {err && <p style={styles.error}>{err}</p>}
+      {items.length === 0 && <p style={styles.line}>No review requests yet.</p>}
+      {items.map((item) => (
+        <div key={item.id} style={styles.reviewItem}>
+          <p style={styles.line}>{item.symptomText}</p>
+          <p style={styles.status}>
+            Urgency: {item.urgency} · Status: {item.status}
+          </p>
+          {item.status === "pending" ? (
+            <div style={styles.buttonRow}>
+              <button
+                style={styles.primary}
+                type="button"
+                disabled={busy}
+                onClick={() => decide(item.id, "approve")}
+              >
+                Approve sharing
+              </button>
+              <button
+                style={styles.secondary}
+                type="button"
+                disabled={busy}
+                onClick={() => decide(item.id, "decline")}
+              >
+                Do not share
+              </button>
+            </div>
+          ) : (
+            <p style={styles.line}>
+              {item.status === "approved"
+                ? "You approved this. A healthcare worker can now see the summary."
+                : "You declined. Nothing was shared."}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+type ReviewRequest = {
+  id: string;
+  symptomText: string;
+  summary: string;
+  possibleCauses: string[];
+  urgency: string;
+  status: string;
+  createdAt: string;
+};
+
+function FacilitiesCard({ token }: { token: string }) {
+  const [data, setData] = useState<FacilitiesResponse | null>(null);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    fetch("/api/facilities", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d?.facilities)) setData(d);
+        else setErr(d?.error ?? "Could not load services near you");
+      })
+      .catch(() => setErr("Network problem. Try again."));
+  }, [token]);
+
+  return (
+    <div style={styles.card}>
+      <h2 style={styles.cardTitle}>Health services</h2>
+      <p style={styles.subtitle}>Facilities, pharmacies, laboratories, and ambulance services.</p>
+      {err && <p style={styles.error}>{err}</p>}
+      {data && <p style={styles.status}>{data.note}</p>}
+      {data?.facilities.map((f) => (
+        <div key={f.id} style={styles.reviewItem}>
+          <p style={styles.line}>
+            <strong>{f.name}</strong>
+            {f.distanceKm !== undefined && ` — about ${f.distanceKm} km away`}
+          </p>
+          <p style={styles.status}>{f.capability}</p>
+          <p style={styles.status}>
+            {f.address}
+            {f.openHours ? ` · ${f.openHours}` : ""}
+          </p>
+          {f.phone && <p style={styles.status}>Phone: {f.phone}</p>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+type FacilitiesResponse = {
+  locationUsed: boolean;
+  note: string;
+  facilities: {
+    id: string;
+    name: string;
+    type: string;
+    capability: string;
+    address: string;
+    phone: string | null;
+    openHours: string | null;
+    distanceKm?: number;
+  }[];
+};
 
 function FirstAidGuides({ token }: { token: string }) {
   const [topics, setTopics] = useState<FirstAid[]>([]);
@@ -780,6 +966,14 @@ const styles: Record<string, CSSProperties> = {
   avoidTitle: { fontSize: 13, fontWeight: 700, margin: "8px 0 0 0", color: "#7F1D1D" },
   stepList: { margin: "6px 0 0 0", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 4 },
   step: { fontSize: 14, color: "#26332D" },
+  reviewItem: {
+    borderTop: "1px solid #E3EAE5",
+    paddingTop: 12,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8
+  },
+  buttonRow: { display: "flex", gap: 10, flexWrap: "wrap" },
   details: {
     border: "1px solid #E3EAE5",
     borderRadius: 12,
