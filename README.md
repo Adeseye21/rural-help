@@ -49,13 +49,39 @@ Make appropriate healthcare information, guidance, professional support, and ref
 9. Keep emergency information accessible offline where possible.
 10. Provide clear escalation when the platform cannot safely support a situation.
 
+## Status
+
+Initial monorepo scaffolded — Express API connected to local PostgreSQL, React/Vite PWA with offline support, sign-in-page demo from the design phase still in `app.html` and `design.html`.
+
+## Development
+
+Monorepo (pnpm workspaces): `packages/api` (Express + TypeScript + Drizzle) and `packages/web` (React 18 + Vite PWA).
+
+Prerequisites:
+
+- Node.js 24 (LTS) and pnpm 12
+- PostgreSQL 18 running locally with a `rural_help` database (owner role `rural_help`)
+
+Commands (run from the repo root):
+
+```
+pnpm install
+pnpm dev                # API on :3001 + web on :5173 (PWA)
+pnpm typecheck          # typecheck all packages
+pnpm db:generate        # generate Drizzle migration from schema
+pnpm db:migrate         # apply migrations to the database
+```
+
+Configuration lives in `packages/api/.env` (copy from `.env.example`). The web dev server proxies `/api` to the API.
+
+## Design Reference
+
+- `design.html` — visual design system (colors, typography, buttons, inputs)
+- `app.html` — sign-in page + dashboard demo from the design phase
+
 ## Product Requirements
 
 The full specification is in [PRD.md](./PRD.md), a Product Requirements Document covering users, features, workflows, safety requirements, success measures, and MVP scope.
-
-## Status
-
-Documentation phase — this repository currently contains the product specification and README. No application code has been built yet.
 
 ## License
 

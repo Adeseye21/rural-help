@@ -1,0 +1,12 @@
+{
+  "name": "rural-help",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@12.6.0",
+  "scripts": {
+    "dev": "pnpm -r --stream --parallel run dev",
+    "typecheck": "pnpm -r run typecheck",
+    "db:generate": "pnpm --filter @rural-help/api db:generate",
+    "db:migrate": "pnpm --filter @rural-help/api db:migrate"
+  }
+}
