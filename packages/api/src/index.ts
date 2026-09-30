@@ -5,6 +5,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import authRouter from "./auth/router.js";
 import patientRouter from "./patient/router.js";
+import symptomRouter from "./symptom/router.js";
 
 const app = express();
 app.use(cors());
@@ -18,6 +19,7 @@ export const db = drizzle(pool);
 
 app.use("/api/auth", authRouter);
 app.use("/api/patient", patientRouter);
+app.use("/api/symptom", symptomRouter);
 
 app.get("/health", async (_req, res) => {
   try {
