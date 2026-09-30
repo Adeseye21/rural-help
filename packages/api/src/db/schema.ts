@@ -47,6 +47,21 @@ export const refreshTokens = pgTable(
   (t) => [index("refresh_tokens_user_idx").on(t.userId)]
 );
 
+export const passwordResets = pgTable(
+  "password_resets",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => [index("password_resets_user_idx").on(t.userId)]
+);
+
 export const patientProfiles = pgTable(
   "patient_profiles",
   {

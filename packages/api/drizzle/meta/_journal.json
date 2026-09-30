@@ -15,6 +15,13 @@
       "when": 1790774630475,
       "tag": "0001_medical_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790775999922,
+      "tag": "0002_light_shriek",
+      "breakpoints": true
     }
   ]
 }

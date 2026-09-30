@@ -18,14 +18,74 @@ type Profile = {
   allowEmergencyAccess: boolean;
 };
 
+const SESSION_KEY = "ruralhelp.session";
+
+function storeSession(s: AuthResult, remember: boolean) {
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+  (remember ? localStorage : sessionStorage).setItem(SESSION_KEY, JSON.stringify(s));
+}
+
+function readSession(): AuthResult | null {
+  const raw = localStorage.getItem(SESSION_KEY) ?? sessionStorage.getItem(SESSION_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as AuthResult;
+  } catch {
+    return null;
+  }
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
 export function App() {
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "reset">("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const [resetStep, setResetStep] = useState<"email" | "code">("email");
+  const [resetCode, setResetCode] = useState("");
+  const [devCode, setDevCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [session, setSession] = useState<AuthResult | null>(null);
+
+  const saveSession = (s: AuthResult, rememberChecked: boolean) => storeSession(s, rememberChecked);
+
+  useEffect(() => {
+    const stored = readSession();
+    if (!stored) return;
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/refresh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken: stored.refreshToken })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          const next = {
+            id: data.id,
+            name: stored.name,
+            role: data.role,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken
+          } as AuthResult;
+          setSession(next);
+          storeSession(next, true);
+        } else {
+          clearSession();
+        }
+      } catch {
+        clearSession();
+      }
+    })();
+  }, []);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -44,6 +104,7 @@ export function App() {
         throw new Error(data.error ?? "Request failed");
       }
       setSession(data as AuthResult);
+      saveSession(data as AuthResult, remember);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -51,8 +112,147 @@ export function App() {
     }
   }
 
+  async function sendResetCode(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Request failed");
+      if (data.devCode) setDevCode(data.devCode);
+      setResetStep("code");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function finishReset(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code: resetCode, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Request failed");
+      setResetStep("email");
+      setMode("login");
+      setDevCode("");
+      setResetCode("");
+      setPassword("");
+      setError("");
+      alert(data.message ?? "Password updated. You can now sign in.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function signOut() {
+    const s = readSession();
+    clearSession();
+    setSession(null);
+    if (s) {
+      void fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken: s.refreshToken })
+      }).catch(() => void 0);
+    }
+  }
+
   if (session) {
-    return <SignedIn session={session} onSignOut={() => setSession(null)} />;
+    return <SignedIn session={session} onSignOut={signOut} />;
+  }
+
+  if (mode === "reset") {
+    return (
+      <main style={styles.main}>
+        <h1 style={styles.title}>Rural Help</h1>
+        <p style={styles.subtitle}>Reset your password</p>
+        <form style={styles.card} onSubmit={resetStep === "email" ? sendResetCode : finishReset}>
+          <h2 style={styles.cardTitle}>Forgot password</h2>
+          {resetStep === "email" ? (
+            <>
+              <input
+                style={styles.input}
+                type="email"
+                placeholder="Email you registered with"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              {error && <p style={styles.error}>{error}</p>}
+              <button style={styles.primary} disabled={busy}>
+                {busy ? "Please wait..." : "Send reset code"}
+              </button>
+            </>
+          ) : (
+            <>
+              {devCode && (
+                <div style={styles.codeBox}>
+                  <p style={styles.status}>Dev mode reset code (no email is sent yet):</p>
+                  <p style={styles.code}>{devCode}</p>
+                </div>
+              )}
+              <input
+                style={styles.input}
+                placeholder="Reset code"
+                value={resetCode}
+                onChange={(e) => setResetCode(e.target.value)}
+                required
+              />
+              <div style={styles.passwordWrap}>
+                <input
+                  style={{ ...styles.input, paddingRight: 76 }}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="New password (8+ characters)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+                <button
+                  type="button"
+                  style={styles.passwordToggle}
+                  onClick={() => setShowPassword((v) => !v)}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+              {error && <p style={styles.error}>{error}</p>}
+              <button style={styles.primary} disabled={busy}>
+                {busy ? "Please wait..." : "Set new password"}
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            style={styles.ghost}
+            onClick={() => {
+              setMode("login");
+              setResetStep("email");
+              setDevCode("");
+              setResetCode("");
+              setError("");
+            }}
+          >
+            Back to sign in
+          </button>
+        </form>
+      </main>
+    );
   }
 
   return (
@@ -79,15 +279,44 @@ export function App() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <input
-          style={styles.input}
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-        />
+        <div style={styles.passwordWrap}>
+          <input
+            style={{ ...styles.input, paddingRight: 76 }}
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+          />
+          <button
+            type="button"
+            style={styles.passwordToggle}
+            onClick={() => setShowPassword((v) => !v)}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
+        <label style={styles.consentRow}>
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+          />
+          <span>Stay logged in on this device</span>
+        </label>
+        {mode === "login" && (
+          <button
+            type="button"
+            style={styles.ghost}
+            onClick={() => {
+              setMode("reset");
+              setError("");
+            }}
+          >
+            Forgot password?
+          </button>
+        )}
         {error && <p style={styles.error}>{error}</p>}
         <button style={styles.primary} disabled={busy}>
           {busy ? "Please wait..." : mode === "login" ? "Sign in" : "Create account"}
@@ -367,6 +596,20 @@ const styles: Record<string, CSSProperties> = {
   formBlock: { display: "flex", flexDirection: "column", gap: 10 },
   label: { fontSize: 14, fontWeight: 600 },
   consentRow: { display: "flex", alignItems: "center", gap: 8, fontSize: 14 },
+  passwordWrap: { position: "relative" },
+  passwordToggle: {
+    position: "absolute",
+    right: 10,
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "transparent",
+    border: "none",
+    color: "#0f766e",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    padding: 4
+  },
   input: {
     fontFamily: "inherit",
     fontSize: 16,
@@ -407,6 +650,14 @@ const styles: Record<string, CSSProperties> = {
   },
   error: { fontSize: 14, color: "#b91c1c", margin: 0 },
   status: { fontSize: 13, color: "#0f766e", margin: 0 },
+  codeBox: { display: "flex", flexDirection: "column", gap: 4 },
+  code: {
+    fontSize: 26,
+    fontWeight: 700,
+    letterSpacing: 4,
+    color: "#115d55",
+    margin: 0
+  },
   banner: {
     background: "#fee2e2",
     border: "1px solid #fecaca",

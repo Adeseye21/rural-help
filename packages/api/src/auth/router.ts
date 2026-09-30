@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { and, eq, isNull } from "drizzle-orm";
+import { randomBytes } from "node:crypto";
 import { db } from "../index.js";
-import { refreshTokens, users } from "../db/schema.js";
+import { passwordResets, refreshTokens, users } from "../db/schema.js";
 import { hashPassword, verifyPassword } from "./passwords.js";
 import {
   generateRefreshToken,
@@ -62,6 +63,78 @@ router.post("/register", async (req, res) => {
 
   const tokens = await issueTokenPair(created.id, created.role);
   res.status(201).json({ id: created.id, role: created.role, ...tokens });
+});
+
+const RESET_CODE_TTL_MINUTES = 30;
+
+function hashResetCode(code: string): string {
+  return hashRefreshToken(code);
+}
+
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body ?? {};
+  if (typeof email !== "string") {
+    res.status(400).json({ error: "email is required" });
+    return;
+  }
+  const rows = await db.select().from(users).where(eq(users.email, email)).execute();
+  if (rows.length === 0) {
+    res.status(200).json({ ok: true, message: "If that email is registered, a reset code has been issued." });
+    return;
+  }
+  const code = randomBytes(4).toString("base64url");
+  await db.insert(passwordResets).values({
+    userId: rows[0].id,
+    tokenHash: hashResetCode(code),
+    expiresAt: new Date(Date.now() + RESET_CODE_TTL_MINUTES * 60 * 1000)
+  });
+  res.json({
+    ok: true,
+    message: "A reset code has been issued.",
+    devCode: code,
+    devNote: "Dev mode only: no email is sent. In production this code is emailed to you."
+  });
+});
+
+router.post("/reset-password", async (req, res) => {
+  const { email, code, password } = req.body ?? {};
+  if (typeof email !== "string" || typeof code !== "string" || typeof password !== "string") {
+    res.status(400).json({ error: "email, code, and a new password are required" });
+    return;
+  }
+  if (password.length < 8) {
+    res.status(400).json({ error: "password must be at least 8 characters" });
+    return;
+  }
+  const userRows = await db.select().from(users).where(eq(users.email, email)).execute();
+  const user = userRows[0];
+  if (!user) {
+    res.status(400).json({ error: "invalid email or reset code" });
+    return;
+  }
+  const resetRows = await db
+    .select()
+    .from(passwordResets)
+    .where(and(eq(passwordResets.userId, user.id), eq(passwordResets.tokenHash, hashResetCode(code))))
+    .execute();
+  const reset = resetRows[0];
+  if (!reset || reset.consumedAt || reset.expiresAt.getTime() < Date.now()) {
+    res.status(400).json({ error: "invalid, expired, or already used reset code" });
+    return;
+  }
+  const passwordHash = await hashPassword(password);
+  await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, user.id)).execute();
+  await db
+    .update(passwordResets)
+    .set({ consumedAt: new Date() })
+    .where(eq(passwordResets.id, reset.id))
+    .execute();
+  await db
+    .update(refreshTokens)
+    .set({ revokedAt: new Date() })
+    .where(eq(refreshTokens.userId, user.id))
+    .execute();
+  res.json({ ok: true, message: "Password updated. You can now sign in." });
 });
 
 router.post("/login", async (req, res) => {
