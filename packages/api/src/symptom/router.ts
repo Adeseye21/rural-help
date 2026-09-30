@@ -3,10 +3,25 @@ import { db } from "../index.js";
 import { accessLogs } from "../db/schema.js";
 import { requireAuth, requireRole } from "../auth/middleware.js";
 import { assessSymptoms, refineSymptoms } from "./engine.js";
+import { FIRST_AID_NOTE, firstAidTopics } from "./firstaid.js";
 
 const router = Router();
 
 router.use(requireAuth, requireRole("patient", "caregiver"));
+
+router.get("/first-aid", async (req, res) => {
+  void db
+    .insert(accessLogs)
+    .values({
+      patientId: req.user!.id,
+      actorId: req.user!.id,
+      actorRole: req.user!.role,
+      scope: ["first_aid"],
+      action: "first_aid_guides_viewed"
+    })
+    .execute();
+  res.json({ note: FIRST_AID_NOTE, topics: firstAidTopics });
+});
 
 router.post("/assess", async (req, res) => {
   const text = typeof req.body?.text === "string" ? req.body.text.slice(0, 2000) : "";

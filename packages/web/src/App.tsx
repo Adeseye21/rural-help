@@ -412,16 +412,26 @@ function SignedIn({ session, onSignOut }: { session: AuthResult; onSignOut: () =
         </button>
       </div>
       <SymptomGuidance token={session.accessToken} />
+      <FirstAidGuides token={session.accessToken} />
     </main>
   );
 }
 
 type Question = { id: string; text: string; options: string[] };
 
+type FirstAid = {
+  key: string;
+  title: string;
+  whenToUse: string;
+  steps: string[];
+  avoid: string[];
+};
+
 type AssessResult = {
   isEmergency: boolean;
   emergencyLabel?: string;
   safetyGuidance?: string;
+  firstAid?: FirstAid;
   categories: string[];
   possibleCauses: string[];
   questions: Question[];
@@ -432,10 +442,31 @@ type AssessResult = {
 type RefineResult = {
   urgency: "routine" | "urgent";
   urgencyReason?: string;
+  firstAid?: FirstAid;
   notes: string[];
   nextStep: string;
   disclaimer: string;
 };
+
+function FirstAidBlock({ topic }: { topic: FirstAid }) {
+  return (
+    <div style={styles.firstAid}>
+      <p style={styles.firstAidTitle}>First aid: {topic.title}</p>
+      <p style={styles.status}>{topic.whenToUse}</p>
+      <ol style={styles.stepList}>
+        {topic.steps.map((s) => (
+          <li key={s} style={styles.step}>{s}</li>
+        ))}
+      </ol>
+      <p style={styles.avoidTitle}>Do not:</p>
+      <ul style={styles.stepList}>
+        {topic.avoid.map((s) => (
+          <li key={s} style={styles.step}>{s}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function SymptomGuidance({ token }: { token: string }) {
   const [text, setText] = useState("");
@@ -511,6 +542,7 @@ function SymptomGuidance({ token }: { token: string }) {
           <strong>{result.emergencyLabel}</strong>
           <p style={styles.bannerText}>{result.safetyGuidance}</p>
           <p style={styles.bannerText}>{result.nextStep}</p>
+          {result.firstAid && <FirstAidBlock topic={result.firstAid} />}
         </div>
       )}
       {result && !result.isEmergency && (
@@ -548,6 +580,7 @@ function SymptomGuidance({ token }: { token: string }) {
                 <div style={styles.banner}>
                   <strong>Urgent</strong>
                   <p style={styles.bannerText}>{refined.urgencyReason}</p>
+                  {refined.firstAid && <FirstAidBlock topic={refined.firstAid} />}
                 </div>
               )}
               {refined.notes.map((n) => (
@@ -559,6 +592,52 @@ function SymptomGuidance({ token }: { token: string }) {
         </>
       )}
       {result?.disclaimer && <p style={styles.status}>{result.disclaimer}</p>}
+    </div>
+  );
+}
+
+function FirstAidGuides({ token }: { token: string }) {
+  const [topics, setTopics] = useState<FirstAid[]>([]);
+  const [note, setNote] = useState("");
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    fetch("/api/symptom/first-aid", { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data?.topics)) {
+          setTopics(data.topics);
+          setNote(data.note ?? "");
+        } else {
+          setErr(data?.error ?? "Could not load first-aid guides");
+        }
+      })
+      .catch(() => setErr("Network problem. Try again."));
+  }, [token]);
+
+  return (
+    <div style={styles.card}>
+      <h2 style={styles.cardTitle}>First-aid guides</h2>
+      <p style={styles.subtitle}>Simple steps to take while you get to a health worker.</p>
+      {err && <p style={styles.error}>{err}</p>}
+      {topics.map((t) => (
+        <details key={t.key} style={styles.details}>
+          <summary style={styles.summary}>{t.title}</summary>
+          <p style={styles.line}>{t.whenToUse}</p>
+          <ol style={styles.stepList}>
+            {t.steps.map((s) => (
+              <li key={s} style={styles.step}>{s}</li>
+            ))}
+          </ol>
+          <p style={styles.avoidTitle}>Do not:</p>
+          <ul style={styles.stepList}>
+            {t.avoid.map((s) => (
+              <li key={s} style={styles.step}>{s}</li>
+            ))}
+          </ul>
+        </details>
+      ))}
+      {note && <p style={styles.status}>{note}</p>}
     </div>
   );
 }
@@ -688,5 +767,29 @@ const styles: Record<string, CSSProperties> = {
     marginTop: 8,
     boxShadow: "0 4px 12px rgba(217,83,79,.2)"
   },
-  bannerText: { fontSize: 14, margin: "6px 0 0 0" }
+  bannerText: { fontSize: 14, margin: "6px 0 0 0" },
+  firstAid: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTop: "1px solid rgba(217,83,79,.4)",
+    background: "rgba(255,255,255,.6)",
+    borderRadius: 10,
+    padding: 12
+  },
+  firstAidTitle: { fontSize: 15, fontWeight: 700, margin: 0, color: "#7F1D1D" },
+  avoidTitle: { fontSize: 13, fontWeight: 700, margin: "8px 0 0 0", color: "#7F1D1D" },
+  stepList: { margin: "6px 0 0 0", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 4 },
+  step: { fontSize: 14, color: "#26332D" },
+  details: {
+    border: "1px solid #E3EAE5",
+    borderRadius: 12,
+    padding: "10px 12px",
+    background: "#F7FAF7"
+  },
+  summary: {
+    fontSize: 15,
+    fontWeight: 600,
+    color: "#1F5C43",
+    cursor: "pointer"
+  }
 };

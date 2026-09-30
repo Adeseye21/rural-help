@@ -1,4 +1,5 @@
 import { detectRedFlag } from "./redflags.js";
+import { FIRST_AID_NOTE, firstAidByKey } from "./firstaid.js";
 
 export type Question = {
   id: string;
@@ -211,6 +212,13 @@ export type AssessResult = {
   emergencyLabel?: string;
   safetyGuidance?: string;
   matchedKeyword?: string;
+  firstAid?: {
+    key: string;
+    title: string;
+    whenToUse: string;
+    steps: string[];
+    avoid: string[];
+  };
   categories: string[];
   possibleCauses: string[];
   questions: Question[];
@@ -220,6 +228,26 @@ export type AssessResult = {
 
 export const DISCLAIMER =
   "Rural Help suggestion: this is information, not a diagnosis. A healthcare professional should assess you to determine the cause.";
+
+export type FirstAidRef = {
+  key: string;
+  title: string;
+  whenToUse: string;
+  steps: string[];
+  avoid: string[];
+};
+
+export function toFirstAid(key: string): FirstAidRef | undefined {
+  const topic = firstAidByKey(key);
+  if (!topic) return undefined;
+  return {
+    key: topic.key,
+    title: topic.title,
+    whenToUse: topic.whenToUse,
+    steps: topic.steps,
+    avoid: topic.avoid
+  };
+}
 
 export const DEFAULT_CAUSES = [
   "A symptom like yours can have several possible causes.",
@@ -242,17 +270,27 @@ export const DEFAULT_QUESTIONS: Question[] = [
 export function assessSymptoms(text: string): AssessResult {
   const flag = detectRedFlag(text.toLowerCase());
   if (flag) {
+    const topic = firstAidByKey(flag.firstAid);
     return {
       isEmergency: true,
       emergencyLabel: flag.label,
       safetyGuidance: flag.guidance,
       matchedKeyword: flag.matched,
+      firstAid: topic
+        ? {
+            key: topic.key,
+            title: topic.title,
+            whenToUse: topic.whenToUse,
+            steps: topic.steps,
+            avoid: topic.avoid
+          }
+        : undefined,
       categories: [],
       possibleCauses: [],
       questions: [],
       nextStep:
         "Seek emergency professional care now. Do not delay because of this app. Tell the professional about your symptoms.",
-      disclaimer: "Rural Help suggestion: this is information, not a diagnosis."
+      disclaimer: FIRST_AID_NOTE
     };
   }
 
@@ -276,6 +314,13 @@ export function assessSymptoms(text: string): AssessResult {
 export type RefineResult = {
   urgency: "routine" | "urgent";
   urgencyReason?: string;
+  firstAid?: {
+    key: string;
+    title: string;
+    whenToUse: string;
+    steps: string[];
+    avoid: string[];
+  };
   notes: string[];
   nextStep: string;
   disclaimer: string;
@@ -284,6 +329,7 @@ export type RefineResult = {
 export function refineSymptoms(categories: string[], answers: Record<string, string>): RefineResult {
   const notes: string[] = [];
   let urgencyReason: string | undefined;
+  let firstAidKey: string | undefined;
 
   const flag = (reason: string, note: string) => {
     urgencyReason = reason;
@@ -342,11 +388,18 @@ export function refineSymptoms(categories: string[], answers: Record<string, str
       "a rash that is spreading quickly",
       "A rash spreading quickly should be seen by a professional."
     );
+    firstAidKey = "allergic_reaction";
   }
   if (answers.diarrhea_thirst?.trim() === "Yes, a lot") {
     notes.push(
       "Drink water regularly. If you become very thirsty or urinate very little, you may need professional care."
     );
+    firstAidKey = "dehydration";
+  }
+  if (answers.injury_how?.trim() === "Burn") {
+    firstAidKey = "burns";
+  } else if (categories.includes("injury")) {
+    firstAidKey = "fracture";
   }
   if (answers.fever_duration && ["1–3 days", "More than 3 days"].includes(answers.fever_duration.trim())) {
     notes.push("A fever lasting more than a day or two is worth getting checked.");
@@ -365,6 +418,7 @@ export function refineSymptoms(categories: string[], answers: Record<string, str
   return {
     urgency,
     urgencyReason,
+    firstAid: firstAidKey ? toFirstAid(firstAidKey) : undefined,
     notes: [...new Set(notes)],
     nextStep,
     disclaimer: DISCLAIMER
