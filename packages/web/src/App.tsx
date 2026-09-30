@@ -729,6 +729,8 @@ type AssessResult = {
   isEmergency: boolean;
   emergencyLabel?: string;
   safetyGuidance?: string;
+  needsSameDayCare?: boolean;
+  needsSameDayCareReason?: string;
   firstAid?: FirstAid;
   categories: string[];
   possibleCauses: string[];
@@ -776,7 +778,8 @@ const ICON_CHIPS = [
   { id: "diarrhea", emoji: "💧", label: "Diarrhoea", phrase: "I have diarrhoea" },
   { id: "injury", emoji: "🩹", label: "Injury or wound", phrase: "I have an injury" },
   { id: "rash", emoji: "🔴", label: "Rash", phrase: "I have a rash" },
-  { id: "tiredness", emoji: "😴", label: "Tiredness", phrase: "I feel very tired" }
+  { id: "tiredness", emoji: "😴", label: "Tiredness", phrase: "I feel very tired" },
+  { id: "body_ache", emoji: "🦵", label: "Body ache", phrase: "I have body ache" }
 ];
 
 type VoiceRecognition = {
@@ -974,7 +977,12 @@ function SymptomGuidance({
     const parts: string[] = [];
     if (text.trim()) parts.push(text.trim());
     if (chips.length) parts.push(chips.join(". "));
-    if (mode === "guided") parts.push(`It started ${answers["general_when"] ?? "recently"}.`);
+    if (mode === "guided") {
+      const chosen = ICON_CHIPS.find((c) => c.id === answers["general_what"]);
+      if (chosen) parts.push(chosen.phrase);
+      if (answers["general_when"]) parts.push(`It started ${answers["general_when"].toLowerCase()}.`);
+      if (answers["general_severe"]) parts.push(`It feels ${answers["general_severe"].toLowerCase()}.`);
+    }
     return parts.join(". ");
   }
 
@@ -1031,6 +1039,10 @@ function SymptomGuidance({
   }
 
   async function assess() {
+    if (mode === "guided" && !answers["general_what"]) {
+      setErr("Choose the symptom that is bothering you first.");
+      return;
+    }
     const payload = composedText();
     if (payload.trim().length < 3) {
       setErr("Tell us what is bothering you first.");
@@ -1136,6 +1148,26 @@ function SymptomGuidance({
       {mode === "guided" && (
         <div style={styles.formBlock}>
           <p style={styles.line}>Answer with the buttons below. You do not need to type anything.</p>
+
+          <div style={styles.formBlock}>
+            <p style={styles.label}>What is your symptom?</p>
+            <div style={styles.buttonRow}>
+              {ICON_CHIPS.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  style={answers["general_what"] === c.id ? styles.chipActive : styles.chipIdle}
+                  aria-pressed={answers["general_what"] === c.id}
+                  onClick={() =>
+                    setAnswers((a) => ({ ...a, general_what: a.general_what === c.id ? "" : c.id }))
+                  }
+                >
+                  {c.emoji} {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {[
             { id: "general_when", text: "When did it start?", options: ["Today", "This week", "This month", "Longer ago"] },
             { id: "general_severe", text: "How bad is it?", options: ["Mild", "Moderate", "Severe"] }
@@ -1218,6 +1250,13 @@ function SymptomGuidance({
 
       {result && !result.isEmergency && (
         <>
+          {result.needsSameDayCare && (
+            <div style={styles.banner} role="alert">
+              <strong>Please get this checked today</strong>
+              <p style={styles.bannerText}>{result.nextStep}</p>
+            </div>
+          )}
+
           <div style={styles.formBlock}>
             <p style={styles.label}>Possible causes to consider</p>
             {result.possibleCauses.map((c) => (

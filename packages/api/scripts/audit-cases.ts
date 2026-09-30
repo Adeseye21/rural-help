@@ -49,7 +49,7 @@ export const auditCases: AuditCase[] = [
   { text: "my back hurts after lifting a bag", expectEmergency: false },
   { text: "I feel dizzy when I stand up", expectEmergency: false },
   { text: "my eyes are yellow and my urine is dark", expectEmergency: false },
-  { text: "my leg is swollen and red and hot", expectEmergency: false },
+  { text: "my leg is swollen and red and hot", expectEmergency: true },
   { text: "I cannot sleep at night", expectEmergency: false },
   { text: "my baby is crying a lot", expectEmergency: false },
   { text: "toothache for three days", expectEmergency: false },
@@ -111,5 +111,23 @@ export const auditCases: AuditCase[] = [
   { text: "the baby is crying", expectEmergency: false },
   { text: "I ate something bad", expectEmergency: false },
   { text: "my body is hot", expectEmergency: false },
-  { text: "I need medicine", expectEmergency: false }
+  { text: "I need medicine", expectEmergency: false },
+
+  // Body ache, kept separate from fever
+  { text: "I have leg ache", expectEmergency: false },
+  { text: "my shoulder is aching", expectEmergency: false },
+  { text: "body ache all over", expectEmergency: false },
+  { text: "my back is paining", expectEmergency: false },
+  { text: "my hand hurts", expectEmergency: false },
+  { text: "joint pain", expectEmergency: false },
+  { text: "muscle pain", expectEmergency: false },
+  { text: "my knees ache", expectEmergency: false },
+  { text: "I have wrist pain", expectEmergency: false },
+  { text: "I have a fever", expectEmergency: false },
+
+  // Body ache that is genuinely urgent
+  { text: "I cannot move my leg", expectEmergency: true },
+  { text: "my leg is cold and pale", expectEmergency: true },
+  { text: "my knee is hot and swollen", expectEmergency: true },
+  { text: "chest pain spreading to my arm", expectEmergency: true }
 ];

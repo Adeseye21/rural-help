@@ -226,6 +226,36 @@ export const redFlags: RedFlag[] = [
     firstAid: "bleeding",
     guidance:
       "Bleeding, leaking fluid, or reduced movement during pregnancy needs emergency professional care now. Do not wait."
+  },
+  {
+    keywords: [
+      "cannot move my leg",
+      "cannot move my arm",
+      "cannot walk at all",
+      "cannot stand up",
+      "cannot weight",
+      "my leg is cold",
+      "my foot is cold",
+      "my leg is pale",
+      "my foot is pale",
+      "my leg is numb",
+      "my foot is numb",
+      "leg is cold and pale",
+      "foot is cold and pale",
+      "hot and swollen",
+      "swollen and hot",
+      "red and hot",
+      "hot and red",
+      "pain in my chest and shoulder",
+      "shoulder pain spreading to my chest",
+      "jaw pain and chest pain",
+      "chest pain spreading to my arm",
+      "chest pain spreading to my jaw"
+    ],
+    label: "serious body or joint pain warning",
+    firstAid: "fracture",
+    guidance:
+      "Pain you cannot move through, a limb that is cold, pale, or numb, or pain that spreads from the chest or jaw needs emergency professional care now. Do not delay."
   }
 ];
 

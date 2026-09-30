@@ -14,6 +14,11 @@ export type Category = {
   questions: Question[];
 };
 
+/**
+ * Reported instead of plain `fever` + `body_ache` when both are present.
+ */
+export const FEVER_WITH_BODY_ACHE_ID = "fever_with_body_ache";
+
 export const categories: Category[] = [
   {
     id: "fever",
@@ -204,6 +209,88 @@ export const categories: Category[] = [
         options: ["Yes", "No", "Not sure"]
       }
     ]
+  },
+  {
+    id: "body_ache",
+    keywords: [
+      "body ache",
+      "body aches",
+      "body pain",
+      "body pains",
+      "aching body",
+      "aches all over",
+      "ache all over",
+      "paining all over",
+      "pain all over",
+      "pains all over",
+      "muscle ache",
+      "muscles ache",
+      "muscle pain",
+      "muscles pain",
+      "joint pain",
+      "joints pain",
+      "joint ache",
+      "aching muscles",
+      "aching joints",
+      "leg ache",
+      "leg pain",
+      "legs ache",
+      "legs pain",
+      "my leg is aching",
+      "arm ache",
+      "arm pain",
+      "arm is aching",
+      "shoulder ache",
+      "shoulder pain",
+      "shoulder is aching",
+      "back ache",
+      "back pain",
+      "back is aching",
+      "neck ache",
+      "neck is aching",
+      "hand ache",
+      "hand pain",
+      "wrist ache",
+      "wrist pain",
+      "finger ache",
+      "fingers ache",
+      "knee ache",
+      "knee pain",
+      "hip ache",
+      "hip pain",
+      "foot ache",
+      "feet ache",
+      "foot pain",
+      "feet pain",
+      "heel ache",
+      "calf ache"
+    ],
+    causes: [
+      "Body aches and joint pains have many possible causes, including infection, inflammation, overwork, or a strain.",
+      "Pain in one joint that becomes hot, red, and swollen, or pain after an injury, needs professional assessment."
+    ],
+    questions: [
+      {
+        id: "body_ache_where",
+        text: "Where does it hurt?",
+        options: ["All over my body", "One part only", "My joints", "My muscles"]
+      },
+      {
+        id: "body_ache_duration",
+        text: "How long have you had it?",
+        options: ["Less than 1 day", "1–3 days", "More than 3 days", "Longer than 1 month"]
+      },
+      {
+        id: "body_ache_swollen",
+        text: "Is the sore part swollen, red, or hot to touch?",
+        options: ["No", "Yes", "I am not sure"]
+      },
+      {
+        id: "body_ache_move",
+        text: "Can you move and use that part normally?",
+        options: ["Yes, normally", "Only a little", "No, I cannot move it"]
+      }
+    ]
   }
 ];
 
@@ -212,6 +299,8 @@ export type AssessResult = {
   emergencyLabel?: string;
   safetyGuidance?: string;
   matchedKeyword?: string;
+  needsSameDayCare?: boolean;
+  needsSameDayCareReason?: string;
   firstAid?: {
     key: string;
     title: string;
@@ -283,6 +372,16 @@ export const CATEGORY_LEARN_MORE: Record<string, { label: string; learnMore: str
     label: "Looking after tiredness",
     learnMore:
       "Sleep, eat regular meals, and drink enough water. Seek care if tiredness lasts more than two weeks, or comes with fever, weight loss, chest pain, or swelling in your legs."
+  },
+  body_ache: {
+    label: "Looking after body aches and joint pain",
+    learnMore:
+      "Rest the sore part, keep moving gently so the joint does not stiffen, and drink plenty of water. Seek care if one joint becomes hot, red, or swollen, if you cannot move a limb, if a foot or leg feels cold, pale, or numb, or if the pain follows an injury."
+  },
+  fever_with_body_ache: {
+    label: "Fever together with body aches",
+    learnMore:
+      "Fever with body aches is a common pattern of several different illnesses, and some of them need treatment quickly. A professional can examine you and decide whether a test, such as a malaria test or blood count, is needed. Seek care if you have a stiff neck, a rash that does not fade, confusion, vomiting that will not stop, or if it is a baby, a pregnant person, or someone older or very frail."
   }
 };
 
@@ -364,6 +463,42 @@ export function assessSymptoms(text: string): AssessResult {
   const matched = categories.filter((cat) => cat.keywords.some((k) => text.toLowerCase().includes(k)));
   const matchedCategories = matched.map((c) => c.id);
 
+  // Fever with body aches is kept as its own, separate answer rather than being
+  // merged into either one, because the two together carry more meaning than
+  // either alone. The app still does not name a cause.
+  const hasFever = matchedCategories.includes("fever");
+  const hasBodyAche = matchedCategories.includes("body_ache");
+  const isFeverWithBodyAche = hasFever && hasBodyAche;
+
+  if (isFeverWithBodyAche) {
+    return {
+      isEmergency: false,
+      categories: [FEVER_WITH_BODY_ACHE_ID],
+      possibleCauses: [
+        "Fever with body aches happens in several different illnesses, and some of them need treatment quickly.",
+        "Only a healthcare professional who examines you, and may do a test such as a malaria test or blood count, can tell you which it is."
+      ],
+      questions: [
+        {
+          id: "fever_ache_days",
+          text: "How many days have you had both the fever and the aches?",
+          options: ["1 day", "2–3 days", "More than 3 days", "I do not know"]
+        },
+        {
+          id: "fever_ache_medicine",
+          text: "Have you already taken any medicine for it?",
+          options: ["No", "Yes, and I finished it", "Yes, I am still taking it"]
+        }
+      ],
+      needsSameDayCare: true,
+      needsSameDayCareReason: "fever together with body aches",
+      nextStep:
+        "Fever together with body aches should be checked by a healthcare professional today, ideally with a test. Do not delay because of this app.",
+      sources: sourcesForCategories([FEVER_WITH_BODY_ACHE_ID, "fever", "body_ache"]),
+      disclaimer: DISCLAIMER
+    };
+  }
+
   const causes = matched.length > 0 ? matched.flatMap((c) => c.causes) : DEFAULT_CAUSES;
   const questions = matched.length > 0
     ? matched.flatMap((c) => c.questions).slice(0, 4)
@@ -374,6 +509,7 @@ export function assessSymptoms(text: string): AssessResult {
     categories: matchedCategories,
     possibleCauses: [...new Set(causes)],
     questions,
+    needsSameDayCare: false,
     nextStep: "These symptoms need to be checked so the cause can be found. Consider contact with a healthcare professional or a visit to a facility.",
     sources: sourcesForCategories(matchedCategories),
     disclaimer: DISCLAIMER
@@ -476,6 +612,46 @@ export function refineSymptoms(categories: string[], answers: Record<string, str
   }
   if (answers.cough_duration?.trim() === "More than 3 weeks") {
     notes.push("A cough lasting more than three weeks should be assessed by a professional.");
+  }
+  if (categories.includes(FEVER_WITH_BODY_ACHE_ID)) {
+    flag(
+      "fever together with body aches",
+      "Fever with body aches needs to be checked by a professional today, ideally with a test such as a malaria test or blood count."
+    );
+    if (["2–3 days", "More than 3 days", "I do not know"].includes(answers.fever_ache_days?.trim() ?? "")) {
+      notes.push(
+        "Because this has continued for more than a day, do not stop treatment early even if you start to feel better."
+      );
+    }
+    if (answers.fever_ache_medicine?.trim() === "Yes, I am still taking it") {
+      notes.push(
+        "Do not take leftover medicine meant for someone else, and tell the professional which medicine and dose you are using."
+      );
+    } else if (answers.fever_ache_medicine?.trim() === "Yes, and I finished it") {
+      notes.push(
+        "Tell the professional which medicine you took and when it finished, because that changes what they should check next."
+      );
+    }
+  }
+  if (answers.body_ache_swollen?.trim() === "Yes") {
+    flag(
+      "a swollen, red, or hot painful part",
+      "A painful part that is swollen, red, or hot needs urgent assessment today, especially if it is a joint."
+    );
+    firstAidKey = "fracture";
+  }
+  if (answers.body_ache_move?.trim() === "No, I cannot move it") {
+    flag(
+      "a limb you cannot move",
+      "Not being able to move or use that part needs urgent assessment. Do not force it."
+    );
+    firstAidKey = "fracture";
+  }
+  if (answers.body_ache_duration?.trim() === "Longer than 1 month") {
+    flag(
+      "body or joint pain lasting over a month",
+      "Pain that lasts more than a month should be assessed by a professional so the cause can be found and treated."
+    );
   }
 
   const urgency: "routine" | "urgent" = urgencyReason ? "urgent" : "routine";

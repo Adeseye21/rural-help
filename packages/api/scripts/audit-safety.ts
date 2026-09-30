@@ -16,6 +16,19 @@ const DIAGNOSIS_PATTERNS = [
 ];
 
 const problems: { text: string; reason: string }[] = [];
+
+/**
+ * Names like "malaria" or "typhoid" are allowed when the copy is pointing at a
+ * test a professional might order. What must never appear is the app telling
+ * the patient that they have one.
+ */
+const DIAGNOSIS_ASSERTION =
+  /\b(you have|you are suffering from|you may have|this is|it is|its is|must be|diagnosed with|confirmed|you definitely have|it must be)\s+(malaria|typhoid|covid|asthma|diabetes|ulcer|hiv|tuberculosis|cholera|anaemia|sepsis|a stroke|a heart attack)\b/i;
+
+function assertsDiagnosis(payload: string): boolean {
+  return DIAGNOSIS_ASSERTION.test(payload);
+}
+
 let emergencyCorrect = 0;
 
 for (const c of auditCases) {
@@ -37,6 +50,9 @@ for (const c of auditCases) {
       break;
     }
   }
+  if (assertsDiagnosis(all)) {
+    problems.push({ text: c.text, reason: "asserts a diagnosis in output" });
+  }
 
   if (!r.disclaimer || r.disclaimer.length < 20) problems.push({ text: c.text, reason: "missing disclaimer" });
   if (!r.nextStep || r.nextStep.trim().length < 10) problems.push({ text: c.text, reason: "missing next step" });
@@ -51,15 +67,13 @@ for (const c of auditCases) {
 
   if (!r.isEmergency) {
     if (r.possibleCauses.length === 0) problems.push({ text: c.text, reason: "no causes offered" });
-    if (r.possibleCauses.length > 0) {
-      const advicePrefix =
-        /^(keeping|the main risk|drink|rest|keep|wash|cover|avoid|do not|don't|use|clean|seek|contact|apply|gently|eat|sleep|clean|protect|record|write down)/i;
-      const hedge =
-        /can|may|might|often|usually|sometimes|possible|most|commonly|many|another|one of|other|should|professional/i;
-      const unhedged = r.possibleCauses.filter((x) => !advicePrefix.test(x.trim()) && !hedge.test(x));
-      if (unhedged.length > 0) {
-        problems.push({ text: c.text, reason: `cause without hedging language: "${unhedged[0]}"` });
-      }
+    const advicePrefix =
+      /^(keeping|the main risk|drink|rest|keep|wash|cover|avoid|do not|don't|use|clean|seek|contact|apply|gently|eat|sleep|clean|protect|record|write down)/i;
+    const hedge =
+      /can|may|might|often|usually|sometimes|possible|most|commonly|many|another|one of|other|should|professional/i;
+    const unhedged = r.possibleCauses.filter((x) => !advicePrefix.test(x.trim()) && !hedge.test(x));
+    if (unhedged.length > 0) {
+      problems.push({ text: c.text, reason: `cause without hedging language: "${unhedged[0]}"` });
     }
   }
 
@@ -75,6 +89,57 @@ if (!everyFirstAidHasAvoid) problems.push({ text: "first aid library", reason: "
 
 const everyRedFlagHasGuidance = redFlags.every((f) => f.guidance.trim().length > 20);
 if (!everyRedFlagHasGuidance) problems.push({ text: "red flags", reason: "a red flag has no guidance" });
+
+// Body ache must stay its own answer, and fever + body ache must be a third
+// separate answer rather than being merged into either one.
+const acheOnly = assessSymptoms("I have leg ache");
+if (!acheOnly.categories.includes("body_ache")) {
+  problems.push({ text: "I have leg ache", reason: `body ache not detected: ${acheOnly.categories}` });
+}
+if (acheOnly.categories.includes("fever")) {
+  problems.push({ text: "I have leg ache", reason: "body ache wrongly matched fever" });
+}
+if (acheOnly.needsSameDayCare === true) {
+  problems.push({ text: "I have leg ache", reason: "body ache alone should not demand same-day care" });
+}
+
+const feverOnly = assessSymptoms("I have a fever");
+if (!feverOnly.categories.includes("fever") || feverOnly.categories.includes("body_ache")) {
+  problems.push({ text: "I have a fever", reason: `fever changed: ${feverOnly.categories}` });
+}
+
+const both = assessSymptoms("I have a fever and body ache all over");
+if (both.categories[0] !== "fever_with_body_ache") {
+  problems.push({
+    text: "fever and body ache",
+    reason: `expected fever_with_body_ache first, got ${both.categories}`
+  });
+}
+if (!both.needsSameDayCare) {
+  problems.push({ text: "fever and body ache", reason: "combination is not flagged for same-day care" });
+}
+if (assertsDiagnosis(JSON.stringify(both))) {
+  problems.push({ text: "fever and body ache", reason: "asserts a diagnosis in output" });
+}
+
+const refinedCombo = refineSymptoms(["fever_with_body_ache"], {
+  fever_ache_days: "More than 3 days",
+  fever_ache_medicine: "Yes, I am still taking it"
+});
+if (refinedCombo.urgency !== "urgent") {
+  problems.push({ text: "fever and body ache", reason: "refine did not raise urgency" });
+}
+if (assertsDiagnosis(JSON.stringify(refinedCombo))) {
+  problems.push({ text: "fever and body ache", reason: "refine asserts a diagnosis" });
+}
+
+const refinedAche = refineSymptoms(["body_ache"], {
+  body_ache_where: "My joints",
+  body_ache_swollen: "Yes"
+});
+if (refinedAche.urgency !== "urgent") {
+  problems.push({ text: "swollen joint", reason: "hot/swollen joint did not raise urgency" });
+}
 
 console.log(`cases tested: ${auditCases.length}`);
 console.log(`emergency classification correct: ${emergencyCorrect}/${auditCases.length}`);
