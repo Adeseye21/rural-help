@@ -3,6 +3,7 @@ import cors from "cors";
 import express from "express";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
+import authRouter from "./auth/router.js";
 
 const app = express();
 app.use(cors());
@@ -13,6 +14,8 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL ?? "postgres://rural_help:rural_help_dev@localhost:5432/rural_help"
 });
 export const db = drizzle(pool);
+
+app.use("/api/auth", authRouter);
 
 app.get("/health", async (_req, res) => {
   try {
