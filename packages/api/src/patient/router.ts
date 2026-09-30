@@ -17,6 +17,9 @@ function toPublicProfile(row: typeof patientProfiles.$inferSelect, name: string)
     emergencyContactName: row.emergencyContactName,
     emergencyContactPhone: row.emergencyContactPhone,
     emergencySummary: row.emergencySummary,
+    conditions: row.conditions,
+    medicines: row.medicines,
+    allergies: row.allergies,
     emergencySummaryUpdatedAt: row.emergencySummaryUpdatedAt,
     shareLocation: row.shareLocation,
     allowEmergencyAccess: row.allowEmergencyAccess
@@ -53,6 +56,11 @@ router.put("/profile", async (req, res) => {
   if (typeof body.emergencySummary === "string") {
     updates.emergencySummary = body.emergencySummary;
     updates.emergencySummaryUpdatedAt = new Date();
+  }
+  for (const key of ["conditions", "medicines", "allergies"] as const) {
+    if (Array.isArray(body[key])) {
+      updates[key] = body[key].filter((v: unknown): v is string => typeof v === "string").slice(0, 30);
+    }
   }
   if (typeof body.shareLocation === "boolean") updates.shareLocation = body.shareLocation;
   if (typeof body.allowEmergencyAccess === "boolean") updates.allowEmergencyAccess = body.allowEmergencyAccess;

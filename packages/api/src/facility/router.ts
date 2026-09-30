@@ -19,6 +19,12 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function sortAmbulanceFirstThenName(a: { type: string; name: string }, b: { type: string; name: string }) {
+  if (a.type === "ambulance" && b.type !== "ambulance") return -1;
+  if (b.type === "ambulance" && a.type !== "ambulance") return 1;
+  return a.name.localeCompare(b.name);
+}
+
 router.get("/", async (req, res) => {
   const profileRows = await db
     .select()
@@ -52,6 +58,16 @@ router.get("/", async (req, res) => {
     return;
   }
 
+  if (!hasCoords) {
+    res.json({
+      locationUsed: false,
+      note:
+        "Your location was not sent, so distances are not shown. Nothing was used to sort by distance.",
+      facilities: list.sort(sortAmbulanceFirstThenName)
+    });
+    return;
+  }
+
   const withDistance = list.map((f) => {
     const row = rows.find((r) => r.id === f.id)!;
     return { ...f, distanceKm: Number(haversineKm(lat, lng, row.latitude, row.longitude).toFixed(1)) };
@@ -64,10 +80,8 @@ router.get("/", async (req, res) => {
   });
 
   res.json({
-    locationUsed: hasCoords,
-    note: hasCoords
-      ? "Distances are straight-line estimates from the location you shared."
-      : "No coordinates were sent, so distances are not shown. Location sharing is on.",
+    locationUsed: true,
+    note: "Distances are straight-line estimates from the location you shared.",
     facilities: withDistance
   });
 });

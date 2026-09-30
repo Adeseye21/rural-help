@@ -1,6 +1,7 @@
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -65,6 +66,83 @@ export const passwordResets = pgTable(
 
 export const reviewStatusEnum = pgEnum("review_status", ["pending", "approved", "declined", "shared"]);
 
+export const conversationStatusEnum = pgEnum("conversation_status", [
+  "active",
+  "paused",
+  "completed"
+]);
+
+export const conversations = pgTable(
+  "conversations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    symptomText: text("symptom_text").notNull(),
+    intakeMode: text("intake_mode").notNull().default("typed"),
+    status: conversationStatusEnum("status").notNull().default("active"),
+    categoryIds: jsonb("category_ids").notNull(),
+    possibleCauses: jsonb("possible_causes").notNull(),
+    urgency: text("urgency").notNull().default("routine"),
+    isEmergency: boolean("is_emergency").notNull().default(false),
+    notes: jsonb("notes").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => [index("conversations_patient_idx").on(t.patientId)]
+);
+
+export const reminderStatusEnum = pgEnum("reminder_status", [
+  "active",
+  "paused",
+  "completed",
+  "cancelled"
+]);
+
+export const reminders = pgTable(
+  "reminders",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    conversationId: uuid("conversation_id").references(() => conversations.id, {
+      onDelete: "set null"
+    }),
+    label: text("label").notNull(),
+    instructions: text("instructions").notNull(),
+    intervalDays: integer("interval_days").notNull().default(1),
+    nextDueAt: timestamp("next_due_at", { withTimezone: true }).notNull(),
+    status: reminderStatusEnum("status").notNull().default("active"),
+    escalationNote: text("escalation_note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => [
+    index("reminders_patient_idx").on(t.patientId),
+    index("reminders_due_idx").on(t.nextDueAt)
+  ]
+);
+
+export const healthDocuments = pgTable(
+  "health_documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    documentType: text("document_type").notNull(),
+    rawText: text("raw_text").notNull(),
+    explanation: jsonb("explanation").notNull(),
+    clarifyItems: jsonb("clarify_items").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => [index("health_documents_patient_idx").on(t.patientId)]
+);
+
 export const reviewRequests = pgTable(
   "review_requests",
   {
@@ -108,6 +186,9 @@ export const patientProfiles = pgTable(
     emergencyContactName: text("emergency_contact_name"),
     emergencyContactPhone: text("emergency_contact_phone"),
     emergencySummary: text("emergency_summary"),
+    conditions: jsonb("conditions").$type<string[]>().notNull().default([]),
+    medicines: jsonb("medicines").$type<string[]>().notNull().default([]),
+    allergies: jsonb("allergies").$type<string[]>().notNull().default([]),
     emergencySummaryUpdatedAt: timestamp("emergency_summary_updated_at", { withTimezone: true }),
     shareLocation: boolean("share_location").notNull().default(false),
     allowEmergencyAccess: boolean("allow_emergency_access").notNull().default(true),

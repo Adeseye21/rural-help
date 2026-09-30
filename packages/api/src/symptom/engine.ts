@@ -223,11 +223,77 @@ export type AssessResult = {
   possibleCauses: string[];
   questions: Question[];
   nextStep: string;
+  sources: { title: string; detail: string; kind: "learning" | "service" }[];
   disclaimer: string;
 };
 
 export const DISCLAIMER =
   "Rural Help suggestion: this is information, not a diagnosis. A healthcare professional should assess you to determine the cause.";
+
+export const GENERAL_SOURCES = [
+  {
+    title: "Where to get help now",
+    detail: "Ask your community health worker, visit the nearest health facility, or call your local emergency number.",
+    kind: "service" as const
+  },
+  {
+    title: "About home care and first aid",
+    detail: "Keep a first aid box at home, and write down your medicines, allergies, and ongoing conditions so anyone can help you.",
+    kind: "learning" as const
+  }
+];
+
+export const CATEGORY_LEARN_MORE: Record<string, { label: string; learnMore: string }> = {
+  fever: {
+    label: "Looking after a fever",
+    learnMore:
+      "Rest in a cool room, keep drinking fluids, and record your temperature if you can. Seek care if a fever lasts more than three days, if a baby under three months has a fever, or if you have a stiff neck or a rash that does not fade."
+  },
+  cough: {
+    label: "Looking after a cough",
+    learnMore:
+      "Warm drinks and staying away from smoke can help. Seek care if a cough lasts more than three weeks, brings up blood, or comes with breathlessness or chest pain."
+  },
+  headache: {
+    label: "Looking after a headache",
+    learnMore:
+      "Rest in a quiet dark room, drink water, and take any medicine you already use as advised. Seek care for a sudden severe headache, a headache with weakness or vision change, or one that keeps returning."
+  },
+  stomach_pain: {
+    label: "Looking after stomach pain",
+    learnMore:
+      "Sips of clean water and rest can help while your stomach settles. Seek care for severe or one-sided pain, pain with a fever, blood in vomit or stool, or vomiting that will not stop."
+  },
+  diarrhea: {
+    label: "Looking after diarrhoea",
+    learnMore:
+      "Keep drinking small sips of clean water or ORS to replace what you lose. Seek care for blood in stool, high fever, severe tummy pain, or if a child becomes weak or drowsy."
+  },
+  injury: {
+    label: "Caring for a wound",
+    learnMore:
+      "Clean a wound with clean water and cover it. Seek care if a bite or dirty wound is involved, if you cannot move or feel a limb, or if bleeding will not stop."
+  },
+  rash: {
+    label: "Looking after a rash",
+    learnMore:
+      "Keep the skin cool and clean and do not scratch. Seek care if the rash does not fade when pressed, if you have a fever, if it spreads quickly, or if your face or throat swell."
+  },
+  tiredness: {
+    label: "Looking after tiredness",
+    learnMore:
+      "Sleep, eat regular meals, and drink enough water. Seek care if tiredness lasts more than two weeks, or comes with fever, weight loss, chest pain, or swelling in your legs."
+  }
+};
+
+export function sourcesForCategories(categoryIds: string[]) {
+  const extras = categoryIds
+    .slice(0, 3)
+    .map((id) => CATEGORY_LEARN_MORE[id])
+    .filter((v): v is { label: string; learnMore: string } => Boolean(v))
+    .map((v) => ({ title: v.label, detail: v.learnMore, kind: "learning" as const }));
+  return [...extras, ...GENERAL_SOURCES];
+}
 
 export type FirstAidRef = {
   key: string;
@@ -290,11 +356,13 @@ export function assessSymptoms(text: string): AssessResult {
       questions: [],
       nextStep:
         "Seek emergency professional care now. Do not delay because of this app. Tell the professional about your symptoms.",
+      sources: sourcesForCategories([]),
       disclaimer: FIRST_AID_NOTE
     };
   }
 
   const matched = categories.filter((cat) => cat.keywords.some((k) => text.toLowerCase().includes(k)));
+  const matchedCategories = matched.map((c) => c.id);
 
   const causes = matched.length > 0 ? matched.flatMap((c) => c.causes) : DEFAULT_CAUSES;
   const questions = matched.length > 0
@@ -303,10 +371,11 @@ export function assessSymptoms(text: string): AssessResult {
 
   return {
     isEmergency: false,
-    categories: matched.map((c) => c.id),
+    categories: matchedCategories,
     possibleCauses: [...new Set(causes)],
     questions,
     nextStep: "These symptoms need to be checked so the cause can be found. Consider contact with a healthcare professional or a visit to a facility.",
+    sources: sourcesForCategories(matchedCategories),
     disclaimer: DISCLAIMER
   };
 }
@@ -323,6 +392,7 @@ export type RefineResult = {
   };
   notes: string[];
   nextStep: string;
+  sources: { title: string; detail: string; kind: "learning" | "service" }[];
   disclaimer: string;
 };
 
@@ -421,6 +491,7 @@ export function refineSymptoms(categories: string[], answers: Record<string, str
     firstAid: firstAidKey ? toFirstAid(firstAidKey) : undefined,
     notes: [...new Set(notes)],
     nextStep,
+    sources: sourcesForCategories(categories),
     disclaimer: DISCLAIMER
   };
 }

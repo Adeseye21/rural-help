@@ -8,6 +8,10 @@ import patientRouter from "./patient/router.js";
 import symptomRouter from "./symptom/router.js";
 import reviewRouter from "./review/router.js";
 import facilityRouter from "./facility/router.js";
+import conversationRouter from "./conversation/router.js";
+import reminderRouter from "./reminder/router.js";
+import documentRouter from "./document/router.js";
+import offlineRouter from "./offline/router.js";
 
 const app = express();
 app.use(cors());
@@ -24,6 +28,10 @@ app.use("/api/patient", patientRouter);
 app.use("/api/symptom", symptomRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/facilities", facilityRouter);
+app.use("/api/conversations", conversationRouter);
+app.use("/api/reminders", reminderRouter);
+app.use("/api/documents", documentRouter);
+app.use("/api/offline", offlineRouter);
 
 app.get("/health", async (_req, res) => {
   try {
