@@ -1,7 +1,19 @@
 import { createHash, randomBytes } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "rural-help-dev-secret");
+const DEV_SECRET = "rural-help-dev-secret";
+const JWT_SECRET = process.env.JWT_SECRET ?? DEV_SECRET;
+
+if (JWT_SECRET === DEV_SECRET) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET must be set to a unique value in production.");
+  }
+  console.warn(
+    "[auth] JWT_SECRET is not set. Using the development secret. Never do this in production."
+  );
+}
+
+const secret = new TextEncoder().encode(JWT_SECRET);
 
 const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL_DAYS = 30;

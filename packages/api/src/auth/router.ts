@@ -67,8 +67,55 @@ router.post("/register", async (req, res) => {
 
 const RESET_CODE_TTL_MINUTES = 30;
 
+/**
+ * The reset code is returned in the response only when no email provider is
+ * configured, so local development works without mail. Never enable this in a
+ * deployed environment: it would hand an account-takeover code to any caller
+ * who knows an email address.
+ */
+function devResetCodesAllowed(): boolean {
+  return process.env.EXPOSE_RESET_CODE === "true" && process.env.NODE_ENV !== "production";
+}
+
 function hashResetCode(code: string): string {
   return hashRefreshToken(code);
+}
+
+/**
+ * Small in-process limiter. Sufficient for a single-instance deployment; a
+ * multi-instance setup needs a shared store (Redis or the database).
+ */
+function createRateLimiter(options: { windowMs: number; max: number }) {
+  const hits = new Map<string, { count: number; resetAt: number }>();
+
+  function prune(now: number) {
+    for (const [key, entry] of hits) {
+      if (entry.resetAt <= now) hits.delete(key);
+    }
+  }
+
+  return function consume(key: string): { allowed: boolean; retryAfterSeconds: number } {
+    const now = Date.now();
+    if (hits.size > 5000) prune(now);
+
+    const entry = hits.get(key);
+    if (!entry || entry.resetAt <= now) {
+      hits.set(key, { count: 1, resetAt: now + options.windowMs });
+      return { allowed: true, retryAfterSeconds: 0 };
+    }
+    if (entry.count >= options.max) {
+      return { allowed: false, retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000) };
+    }
+    entry.count += 1;
+    return { allowed: true, retryAfterSeconds: 0 };
+  };
+}
+
+const forgotLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 });
+const resetLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 10 });
+
+function limiterKey(req: { ip?: string }, fallback: string): string {
+  return req.ip ?? fallback;
 }
 
 router.post("/forgot-password", async (req, res) => {
@@ -77,9 +124,24 @@ router.post("/forgot-password", async (req, res) => {
     res.status(400).json({ error: "email is required" });
     return;
   }
+
+  const limit = forgotLimiter(limiterKey(req, "unknown"));
+  if (!limit.allowed) {
+    res.setHeader("Retry-After", String(limit.retryAfterSeconds));
+    res.status(429).json({
+      error: "too many reset requests. Wait a while before asking for another code."
+    });
+    return;
+  }
+
   const rows = await db.select().from(users).where(eq(users.email, email)).execute();
   if (rows.length === 0) {
-    res.status(200).json({ ok: true, message: "If that email is registered, a reset code has been issued." });
+    // Same response shape whether or not the account exists, so this endpoint
+    // cannot be used to discover which email addresses are registered.
+    res.json({
+      ok: true,
+      message: "If that email is registered, a reset code has been issued."
+    });
     return;
   }
   const code = randomBytes(4).toString("base64url");
@@ -88,11 +150,20 @@ router.post("/forgot-password", async (req, res) => {
     tokenHash: hashResetCode(code),
     expiresAt: new Date(Date.now() + RESET_CODE_TTL_MINUTES * 60 * 1000)
   });
+
+  if (!devResetCodesAllowed()) {
+    res.json({
+      ok: true,
+      message: "If that email is registered, a reset code has been issued."
+    });
+    return;
+  }
+
   res.json({
     ok: true,
     message: "A reset code has been issued.",
     devCode: code,
-    devNote: "Dev mode only: no email is sent. In production this code is emailed to you."
+    devNote: "Local development only: no email is sent. Set EXPOSE_RESET_CODE=true to see this."
   });
 });
 
@@ -106,10 +177,24 @@ router.post("/reset-password", async (req, res) => {
     res.status(400).json({ error: "password must be at least 8 characters" });
     return;
   }
+
+  const limit = resetLimiter(`${limiterKey(req, "unknown")}:${email.toLowerCase()}`);
+  if (!limit.allowed) {
+    res.setHeader("Retry-After", String(limit.retryAfterSeconds));
+    res.status(429).json({
+      error: "too many attempts. Wait a while before trying the code again."
+    });
+    return;
+  }
+
+  // One message for every failure mode, so this endpoint cannot be used to
+  // find out which email addresses have accounts.
+  const invalidCode = { error: "invalid email or reset code" };
+
   const userRows = await db.select().from(users).where(eq(users.email, email)).execute();
   const user = userRows[0];
   if (!user) {
-    res.status(400).json({ error: "invalid email or reset code" });
+    res.status(400).json(invalidCode);
     return;
   }
   const resetRows = await db
@@ -119,16 +204,20 @@ router.post("/reset-password", async (req, res) => {
     .execute();
   const reset = resetRows[0];
   if (!reset || reset.consumedAt || reset.expiresAt.getTime() < Date.now()) {
-    res.status(400).json({ error: "invalid, expired, or already used reset code" });
+    res.status(400).json(invalidCode);
     return;
   }
-  const passwordHash = await hashPassword(password);
-  await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, user.id)).execute();
+
+  // A reset code is single use. Retire it before the password is written so a
+  // failed write cannot leave a live code behind.
   await db
     .update(passwordResets)
     .set({ consumedAt: new Date() })
     .where(eq(passwordResets.id, reset.id))
     .execute();
+
+  const passwordHash = await hashPassword(password);
+  await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, user.id)).execute();
   await db
     .update(refreshTokens)
     .set({ revokedAt: new Date() })

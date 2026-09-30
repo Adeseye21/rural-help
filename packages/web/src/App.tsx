@@ -130,6 +130,7 @@ export function App() {
   const [resetStep, setResetStep] = useState<"email" | "code">("email");
   const [resetCode, setResetCode] = useState("");
   const [devCode, setDevCode] = useState("");
+  const [resetNotice, setResetNotice] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [session, setSession] = useState<AuthResult | null>(null);
@@ -187,6 +188,11 @@ export function App() {
       const data = await api("/api/auth/forgot-password", { method: "POST", body: { email } });
       if (data.devCode) setDevCode(data.devCode);
       setResetStep("code");
+      if (!data.devCode) {
+        setResetNotice(
+          "If that email is registered, a reset code is on its way. It is valid for 30 minutes."
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -258,11 +264,13 @@ export function App() {
             </>
           ) : (
             <>
-              {devCode && (
+              {devCode ? (
                 <div style={styles.codeBox}>
-                  <p style={styles.status}>Dev mode reset code (no email is sent yet):</p>
+                  <p style={styles.status}>Local development reset code (no email is sent yet):</p>
                   <p style={styles.code}>{devCode}</p>
                 </div>
+              ) : (
+                resetNotice && <p style={styles.status}>{resetNotice}</p>
               )}
               <input
                 style={styles.input}
@@ -302,6 +310,7 @@ export function App() {
               setMode("login");
               setResetStep("email");
               setDevCode("");
+              setResetNotice("");
               setResetCode("");
               setError("");
             }}

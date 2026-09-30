@@ -11,7 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "check:explainer": "tsx scripts/check-explainer.ts",
-    "check:safety": "tsx scripts/audit-safety.ts"
+    "check:safety": "tsx scripts/audit-safety.ts",
+    "check:auth": "tsx scripts/check-auth-security.ts"
   },
   "dependencies": {
     "argon2": "^0.41.1",
