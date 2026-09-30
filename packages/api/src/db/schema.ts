@@ -1,4 +1,14 @@
-import { index, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  index,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar
+} from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", [
   "patient",
@@ -35,4 +45,60 @@ export const refreshTokens = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
   },
   (t) => [index("refresh_tokens_user_idx").on(t.userId)]
+);
+
+export const patientProfiles = pgTable(
+  "patient_profiles",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: "cascade" }),
+    dateOfBirth: varchar("date_of_birth", { length: 10 }),
+    bloodType: varchar("blood_type", { length: 5 }),
+    emergencyContactName: text("emergency_contact_name"),
+    emergencyContactPhone: text("emergency_contact_phone"),
+    emergencySummary: text("emergency_summary"),
+    emergencySummaryUpdatedAt: timestamp("emergency_summary_updated_at", { withTimezone: true }),
+    shareLocation: boolean("share_location").notNull().default(false),
+    allowEmergencyAccess: boolean("allow_emergency_access").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => [index("patient_profiles_patient_idx").on(t.patientId)]
+);
+
+export const consentRecords = pgTable(
+  "consent_records",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    granteeRole: text("grantee_role").notNull(),
+    scope: jsonb("scope").notNull(),
+    purpose: text("purpose").notNull(),
+    createdBy: text("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    withdrawnAt: timestamp("withdrawn_at", { withTimezone: true })
+  },
+  (t) => [index("consent_records_patient_idx").on(t.patientId)]
+);
+
+export const accessLogs = pgTable(
+  "access_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    actorId: uuid("actor_id").notNull(),
+    actorRole: text("actor_role").notNull(),
+    scope: jsonb("scope").notNull(),
+    action: text("action").notNull(),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => [index("access_logs_patient_idx").on(t.patientId)]
 );

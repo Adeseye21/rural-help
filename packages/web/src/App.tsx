@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 
 type AuthResult = {
   id: string;
@@ -6,6 +6,16 @@ type AuthResult = {
   role: string;
   accessToken: string;
   refreshToken: string;
+};
+
+type Profile = {
+  dateOfBirth: string | null;
+  bloodType: string | null;
+  emergencyContactName: string | null;
+  emergencyContactPhone: string | null;
+  emergencySummary: string | null;
+  shareLocation: boolean;
+  allowEmergencyAccess: boolean;
 };
 
 export function App() {
@@ -42,22 +52,7 @@ export function App() {
   }
 
   if (session) {
-    return (
-      <main style={styles.main}>
-        <h1 style={styles.title}>Rural Help</h1>
-        <div style={styles.card}>
-          <h2 style={styles.cardTitle}>Signed in</h2>
-          <p style={styles.line}>Name: {session.name ?? "—"}</p>
-          <p style={styles.line}>Role: {session.role}</p>
-          <button
-            style={styles.secondary}
-            onClick={() => setSession(null)}
-          >
-            Sign out
-          </button>
-        </div>
-      </main>
-    );
+    return <SignedIn session={session} onSignOut={() => setSession(null)} />;
   }
 
   return (
@@ -112,6 +107,85 @@ export function App() {
   );
 }
 
+function SignedIn({ session, onSignOut }: { session: AuthResult; onSignOut: () => void }) {
+  const [summary, setSummary] = useState("");
+  const [contact, setContact] = useState("");
+  const [shareLocation, setShareLocation] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    fetch("/api/patient/profile", { headers: { Authorization: `Bearer ${session.accessToken}` } })
+      .then((r) => r.json())
+      .then((p: Profile | null) => {
+        setSummary(p?.emergencySummary ?? "");
+        setContact(p?.emergencyContactPhone ?? "");
+        setShareLocation(p?.shareLocation ?? false);
+      })
+      .catch(() => void 0);
+  }, [session.accessToken]);
+
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    setMsg("");
+    const res = await fetch("/api/patient/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.accessToken}`
+      },
+      body: JSON.stringify({ emergencySummary: summary, emergencyContactPhone: contact, shareLocation })
+    });
+    if (res.ok) {
+      setMsg("Saved. This is your emergency information — you decide what is shared.");
+    } else {
+      const data = await res.json();
+      setMsg(data.error ?? "Could not save");
+    }
+  }
+
+  return (
+    <main style={styles.main}>
+      <h1 style={styles.title}>Rural Help</h1>
+      <div style={styles.card}>
+        <h2 style={styles.cardTitle}>Your profile</h2>
+        <p style={styles.line}>Name: {session.name ?? "—"}</p>
+        <p style={styles.line}>Role: {session.role}</p>
+        <form onSubmit={save} style={styles.formBlock}>
+          <label style={styles.label} htmlFor="summary">Emergency summary</label>
+          <textarea
+            id="summary"
+            style={styles.input}
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
+            placeholder="e.g. Allergies, medicines, important conditions"
+          />
+          <label style={styles.label} htmlFor="contact">Emergency contact phone</label>
+          <input
+            id="contact"
+            style={styles.input}
+            value={contact}
+            onChange={(e) => setContact(e.target.value)}
+            placeholder="e.g. 08012345678"
+          />
+          <label style={styles.consentRow}>
+            <input
+              type="checkbox"
+              checked={shareLocation}
+              onChange={(e) => setShareLocation(e.target.checked)}
+            />
+            <span>Allow location use to find nearby services</span>
+          </label>
+          {msg && <p style={styles.status}>{msg}</p>}
+          <button style={styles.primary} type="submit">Save emergency information</button>
+        </form>
+        <button style={styles.secondary} type="button" onClick={onSignOut}>
+          Sign out
+        </button>
+      </div>
+    </main>
+  );
+}
+
 const styles: Record<string, CSSProperties> = {
   main: {
     minHeight: "100vh",
@@ -142,6 +216,9 @@ const styles: Record<string, CSSProperties> = {
   },
   cardTitle: { fontSize: 18, fontWeight: 600, margin: 0 },
   line: { fontSize: 15, margin: 0, color: "#1f2937" },
+  formBlock: { display: "flex", flexDirection: "column", gap: 10 },
+  label: { fontSize: 14, fontWeight: 600 },
+  consentRow: { display: "flex", alignItems: "center", gap: 8, fontSize: 14 },
   input: {
     fontFamily: "inherit",
     fontSize: 16,
@@ -180,5 +257,6 @@ const styles: Record<string, CSSProperties> = {
     cursor: "pointer",
     padding: 4
   },
-  error: { fontSize: 14, color: "#b91c1c", margin: 0 }
+  error: { fontSize: 14, color: "#b91c1c", margin: 0 },
+  status: { fontSize: 13, color: "#0f766e", margin: 0 }
 };
