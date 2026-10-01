@@ -1,0 +1,52 @@
+# Render blueprint for Rural Help.
+#
+# The API and the built web app are deployed as ONE web service so there is a
+# single origin and a single link. That keeps CORS closed and avoids a second
+# place for a field tester's request to fail on a weak network.
+#
+# Before the first deploy, set these in the Render dashboard (do NOT commit
+# real values here):
+#   NODE_ENV          = production
+#   JWT_SECRET        = a 48-byte random string
+#   SITE_BASIC_AUTH_PASSWORD = a password to share with testers
+
+databases:
+  - name: rural-help-db
+    databaseName: rural_help
+    user: rural_help
+    plan: free
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: rural-help
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: .
+    buildCommand: >-
+      corepack enable &&
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @rural-help/web run build
+    startCommand: >-
+      corepack enable &&
+      pnpm --filter @rural-help/api run db:migrate &&
+      pnpm --filter @rural-help/api run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rural-help-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: EXPOSE_RESET_CODE
+        value: "false"
+      - key: SITE_BASIC_AUTH_PASSWORD
+        sync: false
+      # Left empty on purpose: the API serves the web app from its own origin,
+      # so no cross-origin browser calls need to be accepted.
+      - key: ALLOWED_ORIGINS
+        value: ""
