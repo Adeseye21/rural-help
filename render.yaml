@@ -25,11 +25,9 @@ services:
     region: frankfurt
     rootDir: .
     buildCommand: >-
-      corepack enable &&
       pnpm install --frozen-lockfile &&
       pnpm --filter @rural-help/web run build
     startCommand: >-
-      corepack enable &&
       pnpm --filter @rural-help/api run db:migrate &&
       pnpm --filter @rural-help/api run start
     healthCheckPath: /health
