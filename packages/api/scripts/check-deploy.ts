@@ -93,11 +93,37 @@ try {
     if (password) {
       check("site protected without password", (await get("/", false)).status === 401);
       check("api protected without password", (await get("/api/facilities", false)).status === 401);
-      check("site served with correct password", (await get("/")).status === 200);
+      const authed = await get("/");
+      check("site served with correct password", authed.status === 200);
       const wrong = await fetch(`${BASE}/`, {
         headers: { Authorization: `Basic ${Buffer.from("ruralhelp:wrong").toString("base64")}` }
       });
       check("site rejects wrong password", wrong.status === 401);
+
+      // The app's logged-in calls carry `Authorization: Bearer <token>`, which
+      // replaces the browser's cached Basic credentials instead of adding to
+      // them. The gate cookie is what lets those calls through. This is the
+      // exact flow that broke the live site once.
+      const setCookie = authed.headers.get("set-cookie") ?? "";
+      const gateCookie = setCookie.split(";")[0];
+      check(
+        "gate issues a session cookie on password entry",
+        gateCookie.startsWith("__rh_gate=") && gateCookie.length > "__rh_gate=".length + 16,
+        setCookie.slice(0, 60)
+      );
+      const appStyleBlocked = await fetch(`${BASE}/api/definitely-not-a-route`, {
+        headers: { Authorization: "Bearer app-token-without-gate-cookie" }
+      });
+      check("app-style call without gate cookie is blocked", appStyleBlocked.status === 401);
+      const appStyleAllowed = await fetch(`${BASE}/api/definitely-not-a-route`, {
+        headers: { Authorization: "Bearer app-token-with-gate-cookie", Cookie: gateCookie }
+      });
+      const appStyleBody = await appStyleAllowed.text();
+      check(
+        "app-style call with gate cookie reaches the API",
+        appStyleAllowed.status === 404 && !appStyleBody.includes("Authentication required"),
+        `got ${appStyleAllowed.status}`
+      );
     } else {
       console.log("SKIP  site password checks (SITE_BASIC_AUTH_PASSWORD not set)");
     }

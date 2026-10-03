@@ -1,4 +1,4 @@
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
 
 /**
@@ -25,11 +25,69 @@ function safeEquals(a: string, b: string): boolean {
  */
 const OPEN_PATHS = new Set(["/health", "/healthz"]);
 
+/**
+ * Browsers send cookies automatically on same-origin fetch, alongside whatever
+ * Authorization header the app sets itself. That matters because the app's
+ * authenticated calls use `Authorization: Bearer <token>`, and an explicitly
+ * set header *replaces* the browser's cached Basic credentials instead of
+ * adding to them. Without the cookie, every logged-in API call would fail the
+ * gate even though the human passed it.
+ *
+ * The cookie value is an HMAC keyed on the site password, so rotating the
+ * password invalidates every issued cookie with no server-side session store.
+ */
+const GATE_COOKIE = "__rh_gate";
+const GATE_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+
+function gateCookieValue(password: string): string {
+  return createHmac("sha256", password).update("rural-help-site-gate-v1").digest("hex");
+}
+
+function parseCookies(header: string | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!header) return out;
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq === -1) continue;
+    const name = part.slice(0, eq).trim();
+    if (!name || name in out) continue;
+    const raw = part.slice(eq + 1).trim();
+    try {
+      out[name] = decodeURIComponent(raw);
+    } catch {
+      out[name] = raw;
+    }
+  }
+  return out;
+}
+
+function hasValidGateCookie(req: Request): boolean {
+  if (!SITE_PASSWORD) return false;
+  const presented = parseCookies(req.headers.cookie)[GATE_COOKIE];
+  if (!presented) return false;
+  const expected = gateCookieValue(SITE_PASSWORD);
+  const a = Buffer.from(presented, "utf8");
+  const b = Buffer.from(expected, "utf8");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+function grantGateAccess(res: Response): void {
+  if (!SITE_PASSWORD) return;
+  res.cookie(GATE_COOKIE, gateCookieValue(SITE_PASSWORD), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: isProduction,
+    path: "/",
+    maxAge: GATE_COOKIE_MAX_AGE_MS
+  });
+}
+
 export function siteAuthGate(req: Request, res: Response, next: NextFunction): void {
   // Must call next() when inactive. Returning without it leaves the request
   // hanging forever, which looks like the whole server died.
   if (!isProduction || !SITE_PASSWORD) return next();
   if (OPEN_PATHS.has(req.path)) return next();
+  if (hasValidGateCookie(req)) return next();
 
   const header = req.headers.authorization;
   if (header?.startsWith("Basic ")) {
@@ -39,6 +97,7 @@ export function siteAuthGate(req: Request, res: Response, next: NextFunction): v
       const user = decoded.slice(0, separator);
       const pass = decoded.slice(separator + 1);
       if (safeEquals(user, SITE_USERNAME) && safeEquals(pass, SITE_PASSWORD)) {
+        grantGateAccess(res);
         return next();
       }
     }
