@@ -1320,7 +1320,9 @@ function SymptomGuidance({
             </div>
           )}
 
-          <SourcesBlock sources={result.sources} />
+          {/* The refined answer supersedes the first assessment, so its sources
+              replace the originals instead of appearing underneath them. */}
+          {!refined && <SourcesBlock sources={result.sources} />}
 
           <div style={styles.buttonRow}>
             <button style={styles.secondary} type="button" onClick={saveConversation} disabled={busy}>
