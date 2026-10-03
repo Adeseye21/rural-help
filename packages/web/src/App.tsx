@@ -39,6 +39,18 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Where API requests go. Empty means same-origin, which is how the app runs
+ * when the API serves the web build itself (local dev and the Render deploy).
+ * Set VITE_API_BASE_URL to the API origin when the frontend is hosted
+ * separately, e.g. on Netlify while the API stays on Render.
+ */
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").toString().replace(/\/+$/, "");
+
+export function apiUrl(path: string): string {
+  return `${API_BASE_URL}${path}`;
+}
+
 const SERVER_DOWN =
   "Cannot reach the Rural Help server. Make sure the API is running on port 3001, then try again.";
 
@@ -72,7 +84,7 @@ export async function api(
 ): Promise<any> {
   let res: Response;
   try {
-    res = await fetch(url, {
+    res = await fetch(apiUrl(url), {
       method: options.method ?? "GET",
       headers: {
         ...(options.body === undefined ? {} : { "Content-Type": "application/json" }),
@@ -228,7 +240,7 @@ export function App() {
     clearSession();
     setSession(null);
     if (s) {
-      void fetch("/api/auth/logout", {
+      void fetch(apiUrl("/api/auth/logout"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken: s.refreshToken })
@@ -1535,7 +1547,7 @@ function FirstAidGuides({ token }: { token: string }) {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    fetch("/api/symptom/first-aid", { headers: { Authorization: `Bearer ${token}` } })
+    fetch(apiUrl("/api/symptom/first-aid"), { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data?.topics)) {

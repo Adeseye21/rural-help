@@ -1,0 +1,19 @@
+# Netlify hosts the web frontend only. The API stays wherever it is deployed
+# (currently Render) and the frontend talks to it through VITE_API_BASE_URL.
+#
+# Required Netlify site setting (Site settings -> Environment variables):
+#   VITE_API_BASE_URL = https://rural-help.onrender.com
+#
+# And on the API side, ALLOWED_ORIGINS must include the Netlify site URL,
+# e.g. https://rural-help.netlify.app, or browsers will block every call.
+
+[build]
+  base = "."
+  command = "pnpm install --frozen-lockfile && pnpm --filter @rural-help/web run build"
+  publish = "packages/web/dist"
+
+# Single-page app fallback: client-side routes serve index.html instead of 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
