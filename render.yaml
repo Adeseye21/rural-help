@@ -14,6 +14,7 @@ databases:
   - name: rural-help-db
     databaseName: rural_help
     user: rural_help
+    region: frankfurt
     plan: free
     postgresMajorVersion: "16"
 
