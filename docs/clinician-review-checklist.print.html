@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rural Help — Clinician Review Checklist</title>
+<style>
+  :root { --ink: #111; --muted: #555; --line: #999; --shade: #f4f4f4; }
+  * { box-sizing: border-box; }
+  body { font-family: Georgia, "Times New Roman", serif; color: var(--ink); max-width: 720px; margin: 0 auto; padding: 24px 20px 64px; line-height: 1.5; }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.25rem; margin-top: 2.2rem; border-bottom: 2px solid var(--ink); padding-bottom: 0.2rem; page-break-after: avoid; }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; page-break-after: avoid; }
+  .sub { color: var(--muted); margin-top: 0; }
+  .howto { background: var(--shade); border: 1px solid var(--line); padding: 12px 16px; border-radius: 6px; }
+  blockquote { background: var(--shade); border-left: 4px solid var(--ink); margin: 0.6rem 0; padding: 0.6rem 0.9rem; }
+  blockquote p { margin: 0.3rem 0; }
+  ul.tight { margin: 0.3rem 0; padding-left: 1.2rem; }
+  ul.tight li { margin: 0.15rem 0; }
+  .verdict { margin: 0.5rem 0 0.2rem; font-weight: bold; }
+  .verdict span { font-weight: normal; }
+  .comment { margin: 0.2rem 0 1rem; }
+  .comment .line { display: block; border-bottom: 1px solid var(--line); height: 1.6rem; }
+  table { width: 100%; border-collapse: collapse; margin: 0.6rem 0; font-size: 0.92rem; }
+  th, td { border: 1px solid var(--line); padding: 0.35rem 0.5rem; text-align: left; vertical-align: top; }
+  th { background: var(--shade); }
+  .sign { margin-top: 1rem; }
+  .sign .line { display: inline-block; min-width: 220px; border-bottom: 1px solid var(--ink); height: 1.4rem; }
+  .check { margin: 0.4rem 0; }
+  .no-print { background: #0f766e; color: #fff; border: none; border-radius: 6px; padding: 10px 18px; font-size: 1rem; cursor: pointer; }
+  .part { page-break-before: always; }
+  .part.first { page-break-before: auto; }
+  @media print {
+    body { max-width: none; padding: 0; }
+    .no-print { display: none; }
+    blockquote { background: #f4f4f4; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<button class="no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<h1>Rural Help — Clinician Review Checklist</h1>
+<p class="sub"><strong>Purpose:</strong> systematic sign-off of every health-guidance string the app shows to patients, before field testing or pilot. Review in order: Part A (emergencies) first, then the fever-with-body-aches pathway (B10).</p>
+
+<div class="howto">
+  <strong>How to mark each item:</strong><br>
+  ✅ <strong>Correct</strong> — safe as written.<br>
+  ⚠️ <strong>Too strong</strong> — alarms more than warranted (costly, long trips for something routine).<br>
+  🚨 <strong>Too weak</strong> — understates something dangerous (the harmful direction — this is what the review is hunting for).<br>
+  Add replacement wording wherever the verdict is not Correct.
+</div>
+
+<div class="part first">
+<h2>Part A — Emergency messages (red flags)</h2>
+<p>When the patient's words match, the app shows an emergency banner, the guidance below, first aid, and the instruction: <em>"Seek emergency professional care now. Do not delay because of this app. Tell the professional about your symptoms."</em></p>
+
+<h3>A1. Severe chest pain</h3>
+<blockquote><p>Severe chest pain could be a sign of a heart problem. Do not wait — get emergency professional care now.</p></blockquote>
+<p>First aid shown: Severe chest pain.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A2. Difficulty breathing</h3>
+<blockquote><p>Difficulty breathing is a serious warning sign. Get emergency professional care now.</p></blockquote>
+<p>First aid shown: Difficulty breathing.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A3. Unconsciousness</h3>
+<blockquote><p>An unresponsive person needs emergency professional care immediately. Do not delay.</p></blockquote>
+<p>First aid shown: Unresponsive person.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A4. Seizure</h3>
+<blockquote><p>A seizure can be serious. Call for emergency professional care and keep the person safe from injury.</p></blockquote>
+<p>First aid shown: Seizure (fitting).</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A5. Heavy bleeding</h3>
+<blockquote><p>Heavy bleeding needs urgent professional care. Apply firm pressure and get emergency help now.</p></blockquote>
+<p>First aid shown: Severe bleeding.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A6. Severe allergic reaction</h3>
+<blockquote><p>Swelling of the face, lips, or tongue can be a severe allergic reaction. Get emergency professional care now.</p></blockquote>
+<p>First aid shown: Severe allergic reaction.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A7. Possible stroke signs</h3>
+<blockquote><p>Sudden weakness, drooping, or slurred speech can be signs of a stroke. Get emergency professional care now.</p></blockquote>
+<p>First aid shown: Possible stroke.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A8. Poisoning</h3>
+<blockquote><p>Poisoning is an emergency. Get emergency professional care now and, if possible, tell the professional what was taken.</p></blockquote>
+<p>First aid shown: Poisoning.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A9. Thoughts of self-harm</h3>
+<blockquote><p>Please speak with a professional now. You deserve help — contact a healthcare professional or emergency service immediately.</p></blockquote>
+<p>First aid shown: Thoughts of harming yourself.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A10. Serious bleeding (blood in vomit, stool, urine, cough, or nosebleed that will not stop)</h3>
+<blockquote><p>Blood in vomit or stool can be serious. Get professional assessment as an emergency.</p></blockquote>
+<p>First aid shown: Severe bleeding.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A11. Fainting or collapse warning</h3>
+<blockquote><p>Feeling close to fainting, or having fainted, needs professional assessment. Lie down, and get professional care now — urgent if it does not settle.</p></blockquote>
+<p>First aid shown: Unresponsive person.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A12. Pregnancy emergency (bleeding, leaking fluid, or reduced baby movement)</h3>
+<blockquote><p>Bleeding, leaking fluid, or reduced movement during pregnancy needs emergency professional care now. Do not wait.</p></blockquote>
+<p>First aid shown: Severe bleeding.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>A13. Serious body or joint pain warning</h3>
+<blockquote><p>Pain you cannot move through, a limb that is cold, pale, or numb, or pain that spreads from the chest or jaw needs emergency professional care now. Do not delay.</p></blockquote>
+<p>First aid shown: Broken bone or serious injury.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<p class="verdict">Missing emergencies:</p>
+<p class="comment">Is there wording a patient would type for a true emergency that would match NO group above?<span class="line"></span><span class="line"></span></p>
+</div>
+
+<div class="part">
+<h2>Part B — Symptom pathways (non-emergency answers)</h2>
+<p>Every answer below ends with the disclaimer: <em>"Rural Help suggestion: this is information, not a diagnosis. A healthcare professional should assess you to determine the cause."</em></p>
+
+<h3>B1. Fever</h3>
+<blockquote>
+<p>Fever is most often caused by an infection.</p>
+<p>It can also be caused by other conditions, so a professional should decide the cause.</p>
+</blockquote>
+<p>Questions: how high (Low / High / Very high / don't know); how long (under 1 day / 1–3 days / more than 3 days / on and off); stiff neck or rash (No / Stiff neck / Rash / Both).</p>
+<p>Next step: <em>"These symptoms need to be checked so the cause can be found. Consider contact with a healthcare professional or a visit to a facility."</em></p>
+<blockquote><p>Rest in a cool room, keep drinking fluids, and record your temperature if you can. Seek care if a fever lasts more than three days, if a baby under three months has a fever, or if you have a stiff neck or a rash that does not fade.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B2. Cough</h3>
+<blockquote>
+<p>A cough is commonly caused by an infection or irritation in the airways.</p>
+<p>Smoke and dust can also cause coughing.</p>
+</blockquote>
+<p>Questions: duration (under 1 week / 1–3 weeks / more than 3 weeks); coughing anything up (Nothing / Clear mucus / Coloured mucus / Blood); fever as well (No / mild / high).</p>
+<blockquote><p>Warm drinks and staying away from smoke can help. Seek care if a cough lasts more than three weeks, brings up blood, or comes with breathlessness or chest pain.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B3. Headache</h3>
+<blockquote>
+<p>Headaches have many possible causes, including stress, dehydration, and illness.</p>
+<p>An unusual or very strong headache should be assessed by a professional.</p>
+</blockquote>
+<p>Questions: sudden onset; worst headache ever; recent head injury.</p>
+<blockquote><p>Rest in a quiet dark room, drink water, and take any medicine you already use as advised. Seek care for a sudden severe headache, a headache with weakness or vision change, or one that keeps returning.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B4. Stomach pain</h3>
+<blockquote>
+<p>Stomach pain can have several possible causes, including infection, food, and other conditions.</p>
+<p>Severe or worsening pain needs professional assessment.</p>
+</blockquote>
+<p>Questions: location (upper / lower / all over / right / left); strength (Mild / Moderate / Severe / Getting worse); vomiting (No / once or twice / many times).</p>
+<blockquote><p>Sips of clean water and rest can help while your stomach settles. Seek care for severe or one-sided pain, pain with a fever, blood in vomit or stool, or vomiting that will not stop.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B5. Diarrhoea</h3>
+<blockquote>
+<p>Diarrhea is often caused by an infection or something you ate.</p>
+<p>The main risk is dehydration, so drinking enough water matters.</p>
+</blockquote>
+<p>Questions: duration; blood in stool; very thirsty or urinating less.</p>
+<blockquote><p>Keep drinking small sips of clean water or ORS to replace what you lose. Seek care for blood in stool, high fever, severe tummy pain, or if a child becomes weak or drowsy.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B6. Injury (wound, cut, fall, burn, sprain, bruise, bleeding)</h3>
+<blockquote>
+<p>An injury may need examination to check for deeper damage.</p>
+<p>Keeping the area clean and protected reduces the chance of infection.</p>
+</blockquote>
+<p>Questions: how it happened (Fall / Cut or scrape / Burn / Hit / Other); numbness, weakness, or bone showing; tetanus vaccination up to date.</p>
+<blockquote><p>Clean a wound with clean water and cover it. Seek care if a bite or dirty wound is involved, if you cannot move or feel a limb, or if bleeding will not stop.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B7. Rash</h3>
+<blockquote>
+<p>A rash can be caused by an allergy, an infection, or skin irritation.</p>
+<p>A professional can examine a rash to identify the cause.</p>
+</blockquote>
+<p>Questions: spreading quickly; fever as well.</p>
+<blockquote><p>Keep the skin cool and clean and do not scratch. Seek care if the rash does not fade when pressed, if you have a fever, if it spreads quickly, or if your face or throat swell.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B8. Tiredness</h3>
+<blockquote>
+<p>Tiredness has many causes, including illness, poor sleep, and stress.</p>
+<p>Long-lasting or unexplained tiredness should be discussed with a professional.</p>
+</blockquote>
+<p>Questions: duration (days / weeks / more than a month); sleeping and resting enough.</p>
+<blockquote><p>Sleep, eat regular meals, and drink enough water. Seek care if tiredness lasts more than two weeks, or comes with fever, weight loss, chest pain, or swelling in your legs.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B9. Body ache / joint pain on its own</h3>
+<blockquote>
+<p>Body aches and joint pains have many possible causes, including infection, inflammation, overwork, or a strain.</p>
+<p>Pain in one joint that becomes hot, red, and swollen, or pain after an injury, needs professional assessment.</p>
+</blockquote>
+<p>Questions: where (all over / one part / joints / muscles); how long (under 1 day / 1–3 days / more than 3 days / longer than 1 month); swollen, red, or hot (No / Yes / not sure); can move it normally (normally / a little / cannot).</p>
+<p>Next step: routine check wording (no same-day demand for body ache alone).</p>
+<blockquote><p>Rest the sore part, keep moving gently so the joint does not stiffen, and drink plenty of water. Seek care if one joint becomes hot, red, or swollen, if you cannot move a limb, if a foot or leg feels cold, pale, or numb, or if the pain follows an injury.</p></blockquote>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B10. Fever together with body aches — highest review priority</h3>
+<p>Shown <strong>instead of</strong> the fever and body-ache answers when both are present.</p>
+<blockquote>
+<p>Fever with body aches happens in several different illnesses, and some of them need treatment quickly.</p>
+<p>Only a healthcare professional who examines you, and may do a test such as a malaria test or blood count, can tell you which it is.</p>
+</blockquote>
+<p>Questions: how many days with both (1 day / 2–3 days / more than 3 days / don't know); medicine already taken (No / finished it / still taking it).</p>
+<p>Next step: <em>"Fever together with body aches should be checked by a healthcare professional today, ideally with a test. Do not delay because of this app."</em> (Same-day demand — the app never names a diagnosis.)</p>
+<blockquote><p>Fever with body aches is a common pattern of several different illnesses, and some of them need treatment quickly. A professional can examine you and decide whether a test, such as a malaria test or blood count, is needed. Seek care if you have a stiff neck, a rash that does not fade, confusion, vomiting that will not stop, or if it is a baby, a pregnant person, or someone older or very frail.</p></blockquote>
+<p>Key review questions: (1) Is same-day professional review right for fever with body aches here, including malaria and sepsis risk? (2) Is mentioning "a malaria test or blood count" acceptable, given the app never tells the patient they have malaria? (3) Is the vulnerable-group list (baby, pregnant person, older or frail) right and complete?</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+
+<h3>B11. Unrecognized symptoms (fallback)</h3>
+<blockquote>
+<p>A symptom like yours can have several possible causes.</p>
+<p>A healthcare professional can ask questions and examine you to find the cause.</p>
+</blockquote>
+<p>Questions: when it started; getting better, same, or worse. Next step: routine check wording.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span><span class="line"></span></p>
+</div>
+
+<div class="part">
+<h2>Part C — Follow-up answers that raise urgency</h2>
+<p>These answers change the result to <strong>urgent</strong>: <em>"Please contact a healthcare professional today. Do not delay because of this app."</em> Confirm each threshold is right.</p>
+<table>
+<tr><th>#</th><th>Patient's answer</th><th>App's urgent reason</th></tr>
+<tr><td>C1</td><td>Coughing up blood</td><td>blood in what you cough up</td></tr>
+<tr><td>C2</td><td>Worst headache ever: Yes</td><td>a very severe headache</td></tr>
+<tr><td>C3</td><td>Stomach pain Severe / Getting worse</td><td>severe or worsening stomach pain</td></tr>
+<tr><td>C4</td><td>Blood in stool: Yes</td><td>blood in the stool</td></tr>
+<tr><td>C5</td><td>Stiff neck / Rash / Both with fever</td><td>a stiff neck or rash with fever</td></tr>
+<tr><td>C6</td><td>Fever Very high (above 39°C / 102°F)</td><td>a very high fever</td></tr>
+<tr><td>C7</td><td>Numbness/weakness/bone showing: Yes</td><td>numbness or weakness after an injury</td></tr>
+<tr><td>C8</td><td>Rash spreading quickly: Yes</td><td>a rash that is spreading quickly</td></tr>
+<tr><td>C9</td><td>Fever with body aches (any answers)</td><td>fever together with body aches</td></tr>
+<tr><td>C10</td><td>Sore part swollen, red, or hot: Yes</td><td>a swollen, red, or hot painful part</td></tr>
+<tr><td>C11</td><td>Cannot move the part</td><td>a limb you cannot move</td></tr>
+<tr><td>C12</td><td>Body/joint pain longer than 1 month</td><td>body or joint pain lasting over a month</td></tr>
+</table>
+<p>Non-urgent notes to confirm as safe and correct:</p>
+<ul class="tight">
+<li>Tetanus not up to date / unknown → <em>"If your tetanus vaccination is not up to date, a professional may recommend a booster for injuries."</em></li>
+<li>Very thirsty / urinating very little → drink water regularly; may need professional care (shows Dehydration first aid).</li>
+<li>Burn as injury cause → shows Burns first aid. Any injury → shows fracture/injury first aid.</li>
+<li>Fever 1–3+ days → <em>"A fever lasting more than a day or two is worth getting checked."</em></li>
+<li>Cough over 3 weeks → should be assessed by a professional.</li>
+<li>Fever with aches 2–3+ days or unknown → <em>"Because this has continued for more than a day, do not stop treatment early even if you start to feel better."</em></li>
+<li>Still taking medicine → <em>"Do not take leftover medicine meant for someone else, and tell the professional which medicine and dose you are using."</em></li>
+<li>Finished medicine → <em>"Tell the professional which medicine you took and when it finished, because that changes what they should check next."</em></li>
+</ul>
+<p class="verdict">C-overall: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment (give replacement thresholds where needed):<span class="line"></span><span class="line"></span></p>
+</div>
+
+<div class="part">
+<h2>Part D — First-aid guides (shown in emergencies)</h2>
+<p>Note above every guide: <em>"Rural Help suggestion: this is basic first-aid information. It does not replace training or professional care. In an emergency, get professional help first."</em></p>
+
+<h3>D1. Severe bleeding</h3>
+<p>Use when: blood is spurting, flowing heavily, or will not stop.</p>
+<ul class="tight"><li>Press firmly on the wound with a clean cloth or gauze and keep pressing without lifting it.</li><li>If blood soaks through, add another cloth on top. Do not remove the first one.</li><li>Lay the person down and raise the injured area above the body if this does not hurt more.</li><li>Keep the person warm and calm while help is on the way.</li></ul>
+<p>Avoid: pulling out stuck objects (press around instead); washing or pushing anything into a deep wound.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D2. Difficulty breathing</h3>
+<p>Use when: the person cannot breathe normally, is gasping, or has blue lips.</p>
+<ul class="tight"><li>Help the person sit upright in the position that makes breathing easiest.</li><li>Loosen tight clothing around the neck, chest, and waist.</li><li>Keep them calm and stay with them.</li><li>Get emergency professional care now.</li></ul>
+<p>Avoid: laying flat on the back; giving food or drink to someone struggling to breathe.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D3. Severe chest pain</h3>
+<p>Use when: chest pain is severe, crushing, or spreading to the arm, jaw, or back.</p>
+<ul class="tight"><li>Stop all activity and sit the person upright.</li><li>Keep them calm and still.</li><li>Do not let them drive themselves.</li><li>Get emergency professional care now.</li></ul>
+<p>Avoid: waiting to see if the pain improves on its own.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D4. Unresponsive person</h3>
+<p>Use when: no response to loud voice or gentle shake.</p>
+<ul class="tight"><li>Shout for help and check for a response.</li><li>Turn them onto their side if they are breathing, so they do not choke.</li><li>If they are not breathing normally, begin chest compressions if you are trained to.</li><li>Get emergency professional care immediately.</li></ul>
+<p>Avoid: giving food, drink, or medicine while not awake; leaving them alone.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D5. Seizure (fitting)</h3>
+<p>Use when: shaking, stiffening, or briefly unresponsive.</p>
+<ul class="tight"><li>Clear the area around the person and cushion their head with something soft.</li><li>Note the time the seizure started.</li><li>Stay with them until the shaking stops.</li><li>When it stops, turn them onto their side and get professional care.</li></ul>
+<p>Avoid: restraining movements; putting anything in the mouth; giving water or food until fully alert.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D6. Possible stroke</h3>
+<p>Use when: sudden face drooping, arm weakness, slurred speech, or sudden confusion.</p>
+<ul class="tight"><li>Note the exact time the signs started and tell the healthcare professional.</li><li>Get emergency professional care now.</li><li>Keep the person calm, sitting up, and comfortable.</li><li>Stay with them until help arrives.</li></ul>
+<p>Avoid: giving food, drink, or medicine.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D7. Severe allergic reaction</h3>
+<p>Use when: face/lip/tongue swelling, or trouble breathing after an allergen.</p>
+<ul class="tight"><li>If the person has a prescribed auto-injector, help them use it.</li><li>Get emergency professional care now.</li><li>Lay them down with legs raised, unless breathing is difficult.</li><li>Stay with them and tell responders what happened.</li></ul>
+<p>Avoid: waiting to see if the swelling goes down by itself.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D8. Burns</h3>
+<p>Use when: skin burned by heat, chemicals, or sun.</p>
+<ul class="tight"><li>Cool the burn under clean, cool running water for 20 minutes.</li><li>Remove jewellery or loose clothing near the burn, unless stuck to the skin.</li><li>Cover loosely with cling film or a clean cloth.</li><li>Get professional care for anything larger than the size of a coin, or for deep burns.</li></ul>
+<p>Avoid: butter, ash, oil, toothpaste, or ice; bursting blisters.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D9. Broken bone or serious injury</h3>
+<p>Use when: after a fall, limb looks wrong, or severe pain and swelling.</p>
+<ul class="tight"><li>Keep the person still and support the injured limb in the position found.</li><li>Apply a cold pack wrapped in cloth for up to 20 minutes.</li><li>Raise the injured area if it helps and if there is no worsening pain.</li><li>Get professional assessment.</li></ul>
+<p>Avoid: straightening or pushing a bone back; walking on a possibly broken bone.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D10. Choking</h3>
+<p>Use when: cannot speak, cough, or breathe.</p>
+<ul class="tight"><li>Encourage coughing if the person can still cough forcefully.</li><li>Give 5 firm blows between the shoulder blades with the heel of your hand.</li><li>Then give up to 5 abdominal thrusts above the belly button.</li><li>Alternate 5 blows and 5 thrusts, and get emergency help.</li></ul>
+<p>Avoid: abdominal thrusts on an infant or on someone who is pregnant — seek help instead; giving water to "wash it down."</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D11. Poisoning</h3>
+<p>Use when: swallowed, inhaled, or touched a harmful substance.</p>
+<ul class="tight"><li>Move the person away from the substance and into fresh air if safe.</li><li>Rinse the mouth with clean water if they are awake.</li><li>Keep the container or a photo of the substance to show responders.</li><li>Get emergency professional care immediately.</li></ul>
+<p>Avoid: inducing vomiting; giving food or drink without professional advice.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D12. Heat exhaustion or heat stroke</h3>
+<p>Use when: very hot, dizzy, weak, confused, or stopped sweating.</p>
+<ul class="tight"><li>Move to shade or a cool, ventilated place.</li><li>Loosen clothing and cool the skin with a wet cloth.</li><li>Sip cool water slowly if fully awake.</li><li>Get help if no improvement within 30 minutes or getting worse.</li></ul>
+<p>Avoid: leaving the person alone in the heat.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D13. Dehydration</h3>
+<p>Use when: very thirsty, dry mouth, dark or very little urine, dizziness.</p>
+<ul class="tight"><li>Rest in shade.</li><li>Small frequent sips of water or ORS.</li><li>Cool skin with a damp cloth.</li><li>Get professional care if fluids won't stay down or no improvement.</li></ul>
+<p>Avoid: strong coffee or alcohol.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+
+<h3>D14. Thoughts of harming yourself</h3>
+<p>Use when: talking about ending life or self-harm.</p>
+<ul class="tight"><li>Stay with the person and take them seriously.</li><li>Remove means of harm if safe.</li><li>Contact a professional or emergency service now.</li><li>Do not leave them alone until help takes over.</li></ul>
+<p>Avoid: promising secrecy or leaving them alone.</p>
+<p class="verdict">Verdict: <span>☐ Correct&ensp;/&ensp;☐ Too strong&ensp;/&ensp;☐ Too weak</span></p>
+<p class="comment">Comment:<span class="line"></span></p>
+</div>
+
+<div class="part">
+<h2>Part E — Fixed safety strings</h2>
+<ul class="tight">
+<li>Emergency next step: <em>"Seek emergency professional care now. Do not delay because of this app. Tell the professional about your symptoms."</em> — ☐ Correct / ☐ Too strong / ☐ Too weak</li>
+<li>Urgent next step: <em>"Please contact a healthcare professional today. Do not delay because of this app."</em> — ☐ Correct / ☐ Too strong / ☐ Too weak</li>
+<li>Routine next step: <em>"These symptoms need to be checked so the cause can be found. Consider contact with a healthcare professional or a visit to a facility."</em> — ☐ Correct / ☐ Too strong / ☐ Too weak</li>
+<li>Every non-emergency answer: <em>"Rural Help suggestion: this is information, not a diagnosis. A healthcare professional should assess you to determine the cause."</em> — ☐ Correct / ☐ Too strong / ☐ Too weak</li>
+</ul>
+
+<h2>Sign-off</h2>
+<div class="sign">
+<p>Reviewer name: <span class="line"></span></p>
+<p>Qualification: <span class="line"></span>&ensp;Date: <span class="line"></span></p>
+<p class="check">☐ I have reviewed every item above. All items marked Correct are safe as written; my comments give exact replacement wording for the rest.</p>
+<p class="check">☐ <strong>Signed off for password-gated field testing</strong> (small group, supervised).</p>
+<p class="check">☐ <strong>Signed off for pilot</strong> (wider unsupervised use).</p>
+<p>Conditions or limits:<span class="line" style="display:block; margin-top:0.4rem;"></span><span class="line" style="display:block;"></span></p>
+</div>
+<p><em>Note for the developers: every "Too strong" or "Too weak" verdict becomes a code change with a regression test before the signed-off version ships.</em></p>
+</div>
+
+</body>
+</html>
