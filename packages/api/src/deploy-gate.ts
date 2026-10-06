@@ -20,10 +20,11 @@ function safeEquals(a: string, b: string): boolean {
 }
 
 /**
- * Paths that must stay reachable without the site password so platform health
- * checks and uptime monitors still work.
+ * Paths that must stay reachable without the site password. Health endpoints
+ * keep platform checks working; assetlinks must be publicly fetchable or app
+ * stores and browsers cannot verify the installed Android app.
  */
-const OPEN_PATHS = new Set(["/health", "/healthz"]);
+const OPEN_PATHS = new Set(["/health", "/healthz", "/.well-known/assetlinks.json"]);
 
 /**
  * Browsers send cookies automatically on same-origin fetch, alongside whatever

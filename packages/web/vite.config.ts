@@ -7,15 +7,21 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg"],
+      includeAssets: ["favicon.svg", "icons/*.png"],
       manifest: {
+        id: "/",
         name: "Rural Help",
         short_name: "Rural Help",
         description: "AI-assisted healthcare support for rural communities",
         theme_color: "#0f766e",
         background_color: "#ffffff",
         display: "standalone",
-        icons: [{ src: "/favicon.svg", sizes: "any", type: "image/svg+xml" }]
+        categories: ["health", "medical"],
+        icons: [
+          { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+          { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+          { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" }
+        ]
       }
     })
   ],

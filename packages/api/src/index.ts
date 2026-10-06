@@ -60,6 +60,27 @@ app.get("/health", async (_req, res) => {
   }
 });
 
+// Lets an installed Android app (Trusted Web Activity) prove it belongs to
+// this origin. The signing fingerprint only exists after the APK is built, so
+// it comes from the environment; with none configured this claims nothing.
+app.get("/.well-known/assetlinks.json", (_req, res) => {
+  const fingerprints = (process.env.ASSET_LINKS_FINGERPRINTS ?? "")
+    .split(",")
+    .map((f) => f.trim())
+    .filter(Boolean);
+  if (fingerprints.length === 0) return res.json([]);
+  res.json([
+    {
+      relation: ["delegate_permission/common.handle_all_urls"],
+      target: {
+        namespace: "android_app",
+        package_name: process.env.ASSET_LINKS_PACKAGE ?? "app.ruralhelp.twa",
+        sha256_cert_fingerprints: fingerprints
+      }
+    }
+  ]);
+});
+
 // The web build is served from this same origin so the app never needs a
 // separate API base URL, and so a field tester only ever needs one link.
 const here = path.dirname(fileURLToPath(import.meta.url));
