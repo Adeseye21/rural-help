@@ -9,6 +9,13 @@
 
 **Review in this order:** Part A (emergencies) first, then the fever-with-body-aches pathway (B10), then the rest. Those carry the highest risk if wrong.
 
+## Field-test findings for the reviewer (from 3 supervised testers)
+
+1. **Family is the real emergency pathway.** Asked what they would do at night with no transport if the app said "emergency," a tester answered: *"I will call my family."* Consider whether emergency guidance should explicitly say to call a family member or neighbor now, and what the guidance should say when no transport exists at all.
+2. **Bundled question (B9/C10).** The follow-up *"Is the sore part swollen, red, or hot to touch?"* bundles three signs; a tester noted these can occur individually. Please rule: is the bundle acceptable, or should swollen / red / hot be asked separately? Note the current logic escalates on any single "Yes" either way.
+3. **Detail demand.** A tester found answers "not detailed enough" and asked for symptoms to be "broken down" further. Please rule on whether any additional detail is safe to add, or whether requests of this kind must remain refused (diagnosis demand).
+4. **Assisted use.** Low-literacy use is assisted, not independent ("yes with some guidance"; "we are educated"). Testers also requested pictures alongside question text. Presentation changes are queued behind your first verdicts, not made in parallel.
+
 **When finished:** complete the sign-off block at the end. "Signed off for testing" and "signed off for pilot" are two separate decisions.
 
 ---
