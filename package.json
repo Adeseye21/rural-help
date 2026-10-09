@@ -7,6 +7,10 @@
     "dev": "pnpm -r --stream --parallel run dev",
     "typecheck": "pnpm -r run typecheck",
     "db:generate": "pnpm --filter @rural-help/api db:generate",
-    "db:migrate": "pnpm --filter @rural-help/api db:migrate"
+    "db:migrate": "pnpm --filter @rural-help/api db:migrate",
+    "build:web": "pnpm --dir packages/web build",
+    "mobile:setup": "pnpm --dir packages/web exec cap init \"Rural Help\" \"com.ruralhelp.app\" --web-dir dist",
+    "mobile:sync": "pnpm --dir packages/web exec cap sync android",
+    "mobile:build": "pnpm --dir packages/web exec cap sync android && cd packages/web/android && ./gradlew assembleRelease"
   }
 }
