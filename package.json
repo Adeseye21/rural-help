@@ -9,8 +9,9 @@
     "db:generate": "pnpm --filter @rural-help/api db:generate",
     "db:migrate": "pnpm --filter @rural-help/api db:migrate",
     "build:web": "pnpm --dir packages/web build",
-    "mobile:setup": "pnpm --dir packages/web exec cap init \"Rural Help\" \"com.ruralhelp.app\" --web-dir dist",
+    "mobile:init": "pnpm --dir packages/web exec cap init \"Rural Help\" \"com.ruralhelp.app\" --web-dir dist",
+    "mobile:add-android": "pnpm --dir packages/web exec cap add android",
     "mobile:sync": "pnpm --dir packages/web exec cap sync android",
-    "mobile:build": "pnpm --dir packages/web exec cap sync android && cd packages/web/android && ./gradlew assembleRelease"
+    "mobile:build": "pnpm build:web && pnpm --dir packages/web exec cap sync android && cd packages/web/android && ./gradlew assembleRelease"
   }
 }
