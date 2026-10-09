@@ -56,7 +56,7 @@ export const categories: Category[] = [
       {
         id: "cough_duration",
         text: "How long has the cough lasted?",
-        options: ["Less than 1 week", "1–3 weeks", "More than 3 weeks"]
+        options: ["Less than 1 week", "1–2 weeks", "More than 2 weeks"]
       },
       {
         id: "cough_wet",
@@ -341,7 +341,7 @@ export const CATEGORY_LEARN_MORE: Record<string, { label: string; learnMore: str
   cough: {
     label: "Looking after a cough",
     learnMore:
-      "Warm drinks and staying away from smoke can help. Seek care if a cough lasts more than three weeks, brings up blood, or comes with breathlessness or chest pain."
+      "Warm drinks and staying away from smoke can help. Seek care if cough lasts more than 2 weeks, brings up blood, or comes with breathlessness, chest pain, weight loss or night sweats."
   },
   headache: {
     label: "Looking after a headache",
@@ -356,12 +356,12 @@ export const CATEGORY_LEARN_MORE: Record<string, { label: string; learnMore: str
   diarrhea: {
     label: "Looking after diarrhoea",
     learnMore:
-      "Keep drinking small sips of clean water or ORS to replace what you lose. Seek care for blood in stool, high fever, severe tummy pain, or if a child becomes weak or drowsy."
+      "Keep drinking small sips of clean water or ORS to replace what you lose. If you have ORS, prepare it with clean water as the packet says. Wash hands after using the toilet and before food. Seek care for blood in stool, high fever, severe tummy pain, or if a child becomes weak or drowsy."
   },
   injury: {
     label: "Caring for a wound",
     learnMore:
-      "Clean a wound with clean water and cover it. Seek care if a bite or dirty wound is involved, if you cannot move or feel a limb, or if bleeding will not stop."
+      "Clean a wound with clean water and cover it. Do not apply herbs, toothpaste or ash to a wound. Seek care if a bite or dirty wound is involved, if you cannot move or feel a limb, or if bleeding will not stop."
   },
   rash: {
     label: "Looking after a rash",
@@ -381,7 +381,7 @@ export const CATEGORY_LEARN_MORE: Record<string, { label: string; learnMore: str
   fever_with_body_ache: {
     label: "Fever together with body aches",
     learnMore:
-      "Fever with body aches is a common pattern of several different illnesses, and some of them need treatment quickly. A professional can examine you and decide whether a test, such as a malaria test or blood count, is needed. Seek care if you have a stiff neck, a rash that does not fade, confusion, vomiting that will not stop, or if it is a baby, a pregnant person, or someone older or very frail."
+      "Fever with body aches is a common pattern of several different illnesses, and some of them need treatment quickly. A professional can examine you and decide whether a test, such as a malaria test or blood count, is needed. Seek care same-day, and more urgently if you have a stiff neck, a rash that does not fade when pressed, confusion, vomiting that will not stop, difficulty breathing, or if it is a baby, a pregnant person, an older adult, a very frail person, someone with sickle cell disease, or someone who cannot keep fluids down."
   }
 };
 
@@ -475,8 +475,8 @@ export function assessSymptoms(text: string): AssessResult {
       isEmergency: false,
       categories: [FEVER_WITH_BODY_ACHE_ID],
       possibleCauses: [
-        "Fever with body aches happens in several different illnesses, and some of them need treatment quickly.",
-        "Only a healthcare professional who examines you, and may do a test such as a malaria test or blood count, can tell you which it is."
+        "Fever with body aches is a common pattern of several different illnesses, and some of them need treatment quickly.",
+        "Only a healthcare professional who examines you, and may do a test such as a malaria test or blood count, can tell you which it is. Do not self-treat with antimalarials or antibiotics, and do not take leftover medicine from someone else."
       ],
       questions: [
         {
@@ -610,8 +610,8 @@ export function refineSymptoms(categories: string[], answers: Record<string, str
   if (answers.fever_duration && ["1–3 days", "More than 3 days"].includes(answers.fever_duration.trim())) {
     notes.push("A fever lasting more than a day or two is worth getting checked.");
   }
-  if (answers.cough_duration?.trim() === "More than 3 weeks") {
-    notes.push("A cough lasting more than three weeks should be assessed by a professional.");
+  if (answers.cough_duration?.trim() === "More than 2 weeks") {
+    notes.push("A cough lasting more than two weeks should be assessed by a professional.");
   }
   if (categories.includes(FEVER_WITH_BODY_ACHE_ID)) {
     flag(
@@ -620,7 +620,7 @@ export function refineSymptoms(categories: string[], answers: Record<string, str
     );
     if (["2–3 days", "More than 3 days", "I do not know"].includes(answers.fever_ache_days?.trim() ?? "")) {
       notes.push(
-        "Because this has continued for more than a day, do not stop treatment early even if you start to feel better."
+        "Follow the instructions given by the prescribing healthcare professional. Do not change or stop prescribed treatment without appropriate advice. If symptoms worsen or fail to improve or you experience concerning side effects, seek professional assessment."
       );
     }
     if (answers.fever_ache_medicine?.trim() === "Yes, I am still taking it") {

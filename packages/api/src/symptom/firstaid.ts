@@ -80,7 +80,8 @@ export const firstAidTopics: FirstAidTopic[] = [
     avoid: [
       "Do not hold the person down or restrain their movements.",
       "Do not put anything in their mouth.",
-      "Do not give water or food until they are fully alert."
+      "Do not give water or food until they are fully alert.",
+      "Do not pour water on the patient."
     ]
   },
   {
@@ -119,6 +120,7 @@ export const firstAidTopics: FirstAidTopic[] = [
     ],
     avoid: [
       "Do not apply butter, ash, oil, toothpaste, or ice.",
+      "Do not rub charcoal on a burn, and do not break eggs on it.",
       "Do not burst blisters."
     ]
   },
@@ -130,6 +132,7 @@ export const firstAidTopics: FirstAidTopic[] = [
       "Keep the person still and support the injured limb in the position found.",
       "Apply a cold pack wrapped in cloth for up to 20 minutes.",
       "Raise the injured area if it helps and if there is no worsening pain.",
+      "Use compression and raise the affected limb where it applies.",
       "Get professional assessment."
     ],
     avoid: [
@@ -145,6 +148,8 @@ export const firstAidTopics: FirstAidTopic[] = [
       "Encourage coughing if the person can still cough forcefully.",
       "Give 5 firm blows between the shoulder blades with the heel of your hand.",
       "Then give up to 5 abdominal thrusts above the belly button.",
+      "For babies under 1 year, give 5 back blows and then 5 chest thrusts.",
+      "During pregnancy, give 5 back blows and then 5 chest thrusts instead of abdominal thrusts.",
       "Alternate 5 blows and 5 thrusts, and get emergency help."
     ],
     avoid: [
@@ -172,21 +177,23 @@ export const firstAidTopics: FirstAidTopic[] = [
     title: "Heat exhaustion or heat stroke",
     whenToUse: "The person is very hot, dizzy, weak, confused, or has stopped sweating.",
     steps: [
-      "Move the person to shade or a cool, ventilated place.",
+      "Move to shade or a cool, ventilated place.",
       "Loosen clothing and cool the skin with a wet cloth.",
-      "Sip cool water slowly if the person is fully awake.",
-      "Get help if they do not improve within 30 minutes or get worse."
+      "Sip cool water slowly if fully awake.",
+      "Get help if they do not improve within 30 minutes or get worse.",
+      "If confused, very hot skin, stopped sweating, or fainted — this may be heat stroke: get emergency help immediately and cool aggressively."
     ],
     avoid: ["Do not leave the person alone in the heat."]
   },
   {
     key: "dehydration",
     title: "Dehydration",
-    whenToUse: "Very thirsty, dry mouth, dark or very little urine, dizziness.",
+    whenToUse: "Very thirsty, dry mouth, dark or very little urine, concentrated urine, dizziness.",
     steps: [
       "Rest the person in shade.",
       "Give small, frequent sips of water or an oral rehydration solution.",
       "Cool the skin with a damp cloth.",
+      "Continue breastfeeding for infants.",
       "Get professional care if the person cannot keep fluids down or is not improving."
     ],
     avoid: ["Do not give strong coffee or alcohol to someone who is dehydrated."]
@@ -199,6 +206,7 @@ export const firstAidTopics: FirstAidTopic[] = [
       "Stay with the person and take them seriously.",
       "Remove anything they could use to harm themselves, if it is safe to do so.",
       "Contact a healthcare professional or emergency service now.",
+      "In Nigeria, call the emergency helpline on 112 or contact your nearest hospital emergency. If you can, go with a trusted person now.",
       "Do not leave them alone until help takes over."
     ],
     avoid: ["Do not promise to keep a secret or leave them by themselves."]

@@ -1,4 +1,4 @@
-import { assessSymptoms, refineSymptoms } from "../src/symptom/engine.js";
+import { assessSymptoms, refineSymptoms, sourcesForCategories } from "../src/symptom/engine.js";
 import { firstAidTopics } from "../src/symptom/firstaid.js";
 import { redFlags } from "../src/symptom/redflags.js";
 import { auditCases } from "./audit-cases.js";
@@ -77,7 +77,7 @@ for (const c of auditCases) {
     }
   }
 
-  const refined = refineSymptoms(r.categories, { fever_duration: "More than 3 days", cough_duration: "More than 3 weeks" });
+  const refined = refineSymptoms(r.categories, { fever_duration: "More than 3 days", cough_duration: "More than 2 weeks" });
   if (!refined.disclaimer) problems.push({ text: c.text, reason: "refine missing disclaimer" });
   if (refined.urgency === "urgent" && !refined.urgencyReason) {
     problems.push({ text: c.text, reason: "urgent result without a reason" });
@@ -140,6 +140,58 @@ const refinedAche = refineSymptoms(["body_ache"], {
 if (refinedAche.urgency !== "urgent") {
   problems.push({ text: "swollen joint", reason: "hot/swollen joint did not raise urgency" });
 }
+
+// Clinician-approved copy, pinned so no future edit can silently weaken it.
+// Each assertion below traces to a reviewer verdict (R1–R4).
+function pinCopy(name: string, haystack: string, needle: string): void {
+  if (!haystack.includes(needle)) {
+    problems.push({ text: name, reason: `approved wording missing: "${needle.slice(0, 60)}…"` });
+  }
+}
+
+const bothJson = JSON.stringify(both);
+pinCopy("fever with body aches", bothJson, "Do not self-treat with antimalarials or antibiotics");
+pinCopy("fever with body aches", bothJson, "sickle cell disease");
+pinCopy("fever with body aches", bothJson, "cannot keep fluids down");
+pinCopy("fever with body aches", bothJson, "does not fade when pressed");
+
+const coughLearn = sourcesForCategories(["cough"]);
+pinCopy("cough guidance", JSON.stringify(coughLearn), "more than 2 weeks");
+pinCopy("cough guidance", JSON.stringify(coughLearn), "night sweats");
+
+const refinedComboJson = JSON.stringify(refinedCombo);
+pinCopy("fever with body aches refine", refinedComboJson, "Do not change or stop prescribed treatment");
+if (/stop treatment early even if you start to feel better/.test(refinedComboJson)) {
+  problems.push({ text: "fever with body aches refine", reason: "unsafe superseded advice still present" });
+}
+
+const seizureFlag = redFlags.find((f) => f.label === "seizure");
+pinCopy("seizure guidance", seizureFlag?.guidance ?? "", "lasts more than 5 minutes");
+const faintFlag = redFlags.find((f) => f.label === "fainting or collapse warning");
+pinCopy("fainting guidance", faintFlag?.guidance ?? "", "Lie flat, raise legs if possible");
+
+const seizureAid = firstAidTopics.find((t) => t.key === "seizure");
+pinCopy("seizure first aid", JSON.stringify(seizureAid), "Do not pour water on the patient");
+const burnsAid = firstAidTopics.find((t) => t.key === "burns");
+pinCopy("burns first aid", JSON.stringify(burnsAid), "charcoal");
+pinCopy("burns first aid", JSON.stringify(burnsAid), "eggs");
+const fractureAid = firstAidTopics.find((t) => t.key === "fracture");
+pinCopy("fracture first aid", JSON.stringify(fractureAid), "compression");
+const dehydAid = firstAidTopics.find((t) => t.key === "dehydration");
+pinCopy("dehydration first aid", JSON.stringify(dehydAid), "concentrated urine");
+pinCopy("dehydration first aid", JSON.stringify(dehydAid), "Continue breastfeeding for infants");
+const heatAid = firstAidTopics.find((t) => t.key === "heat");
+pinCopy("heat first aid", JSON.stringify(heatAid), "cool aggressively");
+const chokingAid = firstAidTopics.find((t) => t.key === "choking");
+pinCopy("choking first aid", JSON.stringify(chokingAid), "chest thrusts");
+const distressAid = firstAidTopics.find((t) => t.key === "distress");
+pinCopy("distress first aid", JSON.stringify(distressAid), "112");
+
+const diarrheaLearn = sourcesForCategories(["diarrhea"]);
+pinCopy("diarrhoea guidance", JSON.stringify(diarrheaLearn), "as the packet says");
+pinCopy("diarrhoea guidance", JSON.stringify(diarrheaLearn), "Wash hands after using the toilet");
+const injuryLearn = sourcesForCategories(["injury"]);
+pinCopy("wound guidance", JSON.stringify(injuryLearn), "Do not apply herbs, toothpaste or ash");
 
 console.log(`cases tested: ${auditCases.length}`);
 console.log(`emergency classification correct: ${emergencyCorrect}/${auditCases.length}`);

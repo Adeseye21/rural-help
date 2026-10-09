@@ -44,7 +44,7 @@ export const redFlags: RedFlag[] = [
     label: "seizure",
     firstAid: "seizure",
     guidance:
-      "A seizure can be serious. Call for emergency professional care and keep the person safe from injury."
+      "A seizure can be serious. Call for emergency care and keep the person safe. Especially urgent if first seizure, lasts more than 5 minutes, repeated, or injury."
   },
   {
   keywords: [
@@ -196,7 +196,7 @@ export const redFlags: RedFlag[] = [
     label: "fainting or collapse warning",
     firstAid: "unconscious",
     guidance:
-      "Feeling close to fainting, or having fainted, needs professional assessment. Lie down, and get professional care now — urgent if it does not settle."
+      "Feeling close to fainting, or having fainted, needs professional assessment. Lie flat, raise legs if possible, and get professional care now — urgent if chest pain, fast heartbeat, or does not settle quickly."
   },
   {
     keywords: [
