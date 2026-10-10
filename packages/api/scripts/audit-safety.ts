@@ -176,7 +176,7 @@ const burnsAid = firstAidTopics.find((t) => t.key === "burns");
 pinCopy("burns first aid", JSON.stringify(burnsAid), "charcoal");
 pinCopy("burns first aid", JSON.stringify(burnsAid), "eggs");
 const fractureAid = firstAidTopics.find((t) => t.key === "fracture");
-pinCopy("fracture first aid", JSON.stringify(fractureAid), "compression");
+pinCopy("fracture first aid", JSON.stringify(fractureAid), "do not tightly compress");
 const dehydAid = firstAidTopics.find((t) => t.key === "dehydration");
 pinCopy("dehydration first aid", JSON.stringify(dehydAid), "concentrated urine");
 pinCopy("dehydration first aid", JSON.stringify(dehydAid), "Continue breastfeeding for infants");

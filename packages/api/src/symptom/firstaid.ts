@@ -132,7 +132,7 @@ export const firstAidTopics: FirstAidTopic[] = [
       "Keep the person still and support the injured limb in the position found.",
       "Apply a cold pack wrapped in cloth for up to 20 minutes.",
       "Raise the injured area if it helps and if there is no worsening pain.",
-      "Use compression and raise the affected limb where it applies.",
+      "Raise the affected limb if possible and if it does not cause more pain. Support it in the position found. For a sprain, a light bandage can help, but do not tightly compress a limb that may be broken.",
       "Get professional assessment."
     ],
     avoid: [
